@@ -34,7 +34,7 @@ export function LocationPieChart({ machines }: { machines: MachineRow[] }) {
           <Tooltip
             contentStyle={{ background: '#292524', border: '1px solid #44403c', borderRadius: '6px' }}
             labelStyle={{ color: '#e7e5e4' }}
-            formatter={(v: number) => [`$${v.toFixed(2)}`, 'Revenue']}
+            formatter={(v) => [`$${Number(v).toFixed(2)}`, 'Revenue']}
           />
           <Legend
             formatter={value => <span style={{ color: '#a8a29e', fontSize: 11 }}>{value}</span>}

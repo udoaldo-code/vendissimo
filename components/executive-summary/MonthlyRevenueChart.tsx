@@ -32,7 +32,7 @@ export function MonthlyRevenueChart({ data }: { data: MonthlyRow[] }) {
           <Tooltip
             contentStyle={{ background: '#292524', border: '1px solid #44403c', borderRadius: '6px' }}
             labelStyle={{ color: '#e7e5e4', fontWeight: 600 }}
-            formatter={(v: number) => [`$${v.toFixed(2)}`, 'Revenue']}
+            formatter={(v) => [`$${Number(v).toFixed(2)}`, 'Revenue']}
             cursor={{ fill: '#44403c' }}
           />
           <Bar dataKey="revenue" fill="#f97316" radius={[4, 4, 0, 0]} maxBarSize={40} />

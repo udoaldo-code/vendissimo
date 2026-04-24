@@ -25,7 +25,7 @@ export function WeekdayBarChart({ data }: { data: WeekdayRevenue }) {
           <Tooltip
             contentStyle={{ background: '#292524', border: '1px solid #44403c', borderRadius: '6px' }}
             labelStyle={{ color: '#e7e5e4' }}
-            formatter={(v: number) => [`$${v.toFixed(2)}`, 'Revenue']}
+            formatter={(v) => [`$${Number(v).toFixed(2)}`, 'Revenue']}
             cursor={{ fill: '#44403c' }}
           />
           <Bar dataKey="revenue" radius={[3, 3, 0, 0]} maxBarSize={30}>
