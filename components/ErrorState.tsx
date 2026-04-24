@@ -5,7 +5,7 @@ type Props = { message: string; reset: () => void }
 export function ErrorState({ message, reset }: Props) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-      <div className="text-4xl">⚠</div>
+      <div className="text-4xl">⚠️</div>
       <h2 className="text-[#e7e5e4] text-lg font-semibold">Failed to load data</h2>
       <p className="text-[#a8a29e] text-sm max-w-md text-center">{message}</p>
       <button
