@@ -16,7 +16,8 @@ export function parseCSVLine(line: string): string[] {
   return result
 }
 
-export function parseNum(s: string): number {
+export function parseNum(s: string | undefined | null): number {
+  if (!s) return 0
   const cleaned = s.replace(/[$,%]/g, '').replace(/[^0-9.-]/g, '')
   return parseFloat(cleaned) || 0
 }
