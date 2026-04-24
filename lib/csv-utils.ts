@@ -23,7 +23,46 @@ export function parseNum(s: string | undefined | null): number {
 }
 
 export function parseCSV(text: string): string[][] {
-  return text.split('\n').map(parseCSVLine)
+  const rows: string[][] = []
+  let row: string[] = []
+  let field = ''
+  let inQuotes = false
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]
+    if (inQuotes) {
+      if (ch === '"' && text[i + 1] === '"') {
+        field += '"'
+        i++
+      } else if (ch === '"') {
+        inQuotes = false
+      } else {
+        field += ch // newlines inside quotes are part of the field, not row separators
+      }
+    } else {
+      if (ch === '"') {
+        inQuotes = true
+      } else if (ch === ',') {
+        row.push(field.trim())
+        field = ''
+      } else if (ch === '\n') {
+        if (field.endsWith('\r')) field = field.slice(0, -1)
+        row.push(field.trim())
+        rows.push(row)
+        row = []
+        field = ''
+      } else if (ch === '\r') {
+        // skip bare \r
+      } else {
+        field += ch
+      }
+    }
+  }
+  if (field || row.length > 0) {
+    row.push(field.trim())
+    rows.push(row)
+  }
+  return rows
 }
 
 export function findSectionRow(rows: string[][], marker: string): number {
