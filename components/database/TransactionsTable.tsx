@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import type { Transaction } from '@/lib/types'
+import { parseTransactionDate } from '@/lib/filter-utils'
 
 type SortKey = keyof Transaction | 'revenue'
 type SortDir = 'asc' | 'desc'
@@ -35,19 +36,22 @@ export function TransactionsTable({ transactions }: { transactions: Transaction[
     setPage(0)
   }
 
-  const sorted = [...transactions].sort((a, b) => {
+  const sorted = useMemo(() => [...transactions].sort((a, b) => {
     let av: string | number
     let bv: string | number
     if (sortKey === 'revenue') {
       av = a.unitPrice * a.qty
       bv = b.unitPrice * b.qty
+    } else if (sortKey === 'date') {
+      av = parseTransactionDate(a.date).getTime()
+      bv = parseTransactionDate(b.date).getTime()
     } else {
       av = a[sortKey]
       bv = b[sortKey]
     }
     const cmp = av < bv ? -1 : av > bv ? 1 : 0
     return sortDir === 'asc' ? cmp : -cmp
-  })
+  }), [transactions, sortKey, sortDir])
 
   const totalPages = Math.ceil(sorted.length / PAGE_SIZE)
   const pageRows = sorted.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)

@@ -57,6 +57,6 @@ export function exportToCSVString(transactions: Transaction[]): string {
     (t.unitPrice * t.qty).toFixed(2),
   ])
   const headerRow = headers.map(h => `"${h}"`).join(',')
-  const dataRows = rows.map(row => row.map(cell => `"${cell}"`).join(','))
+  const dataRows = rows.map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(','))
   return [headerRow, ...dataRows].join('\n')
 }
