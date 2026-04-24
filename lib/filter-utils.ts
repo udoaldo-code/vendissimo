@@ -5,6 +5,8 @@ export function parseTransactionDate(dateStr: string): Date {
   return new Date(y, m - 1, d)
 }
 
+// Subsequence match (not substring): each char of `pattern` must appear in `text`
+// in order. Allows queries like "bach" to match "BACCHUS" despite the double-c.
 function fuzzyMatch(text: string, pattern: string): boolean {
   let pi = 0
   for (let i = 0; i < text.length && pi < pattern.length; i++) {
@@ -34,7 +36,7 @@ export function filterTransactions(transactions: Transaction[], filters: FilterS
       const txDate = parseTransactionDate(t.date)
       const [ty, tm, td] = filters.dateTo.split('-').map(Number)
       const to = new Date(ty, tm - 1, td)
-      to.setHours(23, 59, 59)
+      to.setHours(23, 59, 59, 999)
       if (txDate > to) return false
     }
 
@@ -54,7 +56,7 @@ export function exportToCSVString(transactions: Transaction[]): string {
     t.qty.toString(),
     (t.unitPrice * t.qty).toFixed(2),
   ])
-  const headerRow = headers.join(',')
+  const headerRow = headers.map(h => `"${h}"`).join(',')
   const dataRows = rows.map(row => row.map(cell => `"${cell}"`).join(','))
   return [headerRow, ...dataRows].join('\n')
 }

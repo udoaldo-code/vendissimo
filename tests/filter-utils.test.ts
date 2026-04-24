@@ -73,7 +73,7 @@ describe('parseTransactionDate', () => {
 describe('exportToCSVString', () => {
   it('produces CSV with header and data rows', () => {
     const csv = exportToCSVString(SAMPLE.slice(0, 1))
-    expect(csv).toContain('Date,Time,Machine,Location,Product')
+    expect(csv).toContain('"Date","Time","Machine","Location","Product"')
     expect(csv).toContain('OLATTE')
     expect(csv).toContain('1.50')
   })
