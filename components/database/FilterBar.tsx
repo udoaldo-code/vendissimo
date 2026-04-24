@@ -2,6 +2,8 @@
 
 import type { FilterState } from '@/lib/types'
 
+const EMPTY_FILTERS: FilterState = { search: '', machine: '', location: '', product: '', dateFrom: '', dateTo: '' }
+
 type Props = {
   filters: FilterState
   onChange: (filters: FilterState) => void
@@ -57,7 +59,7 @@ export function FilterBar({ filters, onChange, machines, locations, products }: 
       />
       {Object.values(filters).some(Boolean) && (
         <button
-          onClick={() => onChange({ search: '', machine: '', location: '', product: '', dateFrom: '', dateTo: '' })}
+          onClick={() => onChange(EMPTY_FILTERS)}
           className="text-xs text-[#a8a29e] hover:text-[#e7e5e4] px-2 py-1.5 border border-[#44403c] rounded-md hover:border-[#57534e] transition-colors"
         >
           Clear

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Transaction } from '@/lib/types'
 
 type SortKey = keyof Transaction | 'revenue'
@@ -8,10 +8,22 @@ type SortDir = 'asc' | 'desc'
 
 const PAGE_SIZE = 100
 
+const thClass = 'text-left py-2 px-3 text-[#57534e] text-xs uppercase font-medium cursor-pointer hover:text-[#a8a29e] select-none whitespace-nowrap'
+const tdClass = 'py-2 px-3 text-[#a8a29e] text-xs whitespace-nowrap'
+
+function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
+  if (sortKey !== col) return <span className="ml-1 opacity-30">↕</span>
+  return <span className="ml-1 text-[#f97316]">{sortDir === 'asc' ? '↑' : '↓'}</span>
+}
+
 export function TransactionsTable({ transactions }: { transactions: Transaction[] }) {
   const [sortKey, setSortKey] = useState<SortKey>('date')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [page, setPage] = useState(0)
+
+  useEffect(() => {
+    setPage(0)
+  }, [transactions])
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) {
@@ -40,14 +52,6 @@ export function TransactionsTable({ transactions }: { transactions: Transaction[
   const totalPages = Math.ceil(sorted.length / PAGE_SIZE)
   const pageRows = sorted.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
-  const thClass = 'text-left py-2 px-3 text-[#57534e] text-xs uppercase font-medium cursor-pointer hover:text-[#a8a29e] select-none whitespace-nowrap'
-  const tdClass = 'py-2 px-3 text-[#a8a29e] text-xs whitespace-nowrap'
-
-  function SortIcon({ col }: { col: SortKey }) {
-    if (sortKey !== col) return <span className="ml-1 opacity-30">↕</span>
-    return <span className="ml-1 text-[#f97316]">{sortDir === 'asc' ? '↑' : '↓'}</span>
-  }
-
   return (
     <div className="bg-[#292524] rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
@@ -57,7 +61,7 @@ export function TransactionsTable({ transactions }: { transactions: Transaction[
               {(['date', 'time', 'machine', 'location', 'product', 'unitPrice', 'qty', 'revenue'] as SortKey[]).map(col => (
                 <th key={col} className={thClass} onClick={() => toggleSort(col)}>
                   {col === 'unitPrice' ? 'Price' : col === 'revenue' ? 'Revenue' : col.charAt(0).toUpperCase() + col.slice(1)}
-                  <SortIcon col={col} />
+                  <SortIcon col={col} sortKey={sortKey} sortDir={sortDir} />
                 </th>
               ))}
             </tr>

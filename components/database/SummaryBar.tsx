@@ -1,5 +1,3 @@
-'use client'
-
 import type { Transaction } from '@/lib/types'
 
 type Props = { transactions: Transaction[]; total: number }
