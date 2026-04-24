@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import type { MachineRow } from '@/lib/types'
 
 export function MachinePerformanceTable({ machines }: { machines: MachineRow[] }) {
@@ -26,10 +27,10 @@ export function MachinePerformanceTable({ machines }: { machines: MachineRow[] }
         </thead>
         <tbody>
           {locationTotals.map(({ location, total, machines: rows }) => (
-            <>
-              <tr key={location} className="border-t border-[#44403c]">
+            <Fragment key={location}>
+              <tr className="border-t border-[#44403c]">
                 <td colSpan={2} className="py-2 text-[#fbbf24] font-semibold text-xs uppercase tracking-wide">
-                  📍 {location}
+                  {location}
                 </td>
                 <td className="py-2 text-right text-[#fbbf24] font-semibold">${total.toFixed(2)}</td>
                 <td />
@@ -42,7 +43,7 @@ export function MachinePerformanceTable({ machines }: { machines: MachineRow[] }
                   <td className="py-1.5 text-right text-[#57534e] text-xs">{m.revShare.toFixed(1)}%</td>
                 </tr>
               ))}
-            </>
+            </Fragment>
           ))}
         </tbody>
       </table>

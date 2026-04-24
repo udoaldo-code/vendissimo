@@ -27,8 +27,8 @@ export function LocationPieChart({ machines }: { machines: MachineRow[] }) {
             paddingAngle={3}
             dataKey="value"
           >
-            {data.map((_, i) => (
-              <Cell key={i} fill={COLORS[i % COLORS.length]} />
+            {data.map(({ name }, i) => (
+              <Cell key={name} fill={COLORS[i % COLORS.length]} />
             ))}
           </Pie>
           <Tooltip
