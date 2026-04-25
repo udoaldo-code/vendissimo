@@ -1,7 +1,7 @@
 'use client'
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
-import type { WeekdayRevenue, DailyRevenue } from '@/lib/types'
+import type { DailyRevenue } from '@/lib/types'
 import type { DatePreset } from './DateFilter'
 import { parseTransactionDate } from '@/lib/filter-utils'
 
@@ -12,34 +12,21 @@ function fmtDateLabel(dateStr: string): string {
 }
 
 type Props = {
-  weekday: WeekdayRevenue
   daily: DailyRevenue[]
   preset: DatePreset
 }
 
-export function WeekdayBarChart({ weekday, daily, preset }: Props) {
-  const useDaily = preset !== 'all'
-
-  const chartData = useDaily
-    ? daily.map(d => ({ label: fmtDateLabel(d.date), revenue: d.revenue }))
-    : [
-        { label: 'Sun', revenue: weekday.sun },
-        { label: 'Mon', revenue: weekday.mon },
-        { label: 'Tue', revenue: weekday.tue },
-        { label: 'Wed', revenue: weekday.wed },
-        { label: 'Thu', revenue: weekday.thu },
-        { label: 'Fri', revenue: weekday.fri },
-        { label: 'Sat', revenue: weekday.sat },
-      ]
+export function WeekdayBarChart({ daily, preset }: Props) {
+  // For All Time, cap to last 30 days
+  const source = preset === 'all' ? daily.slice(-30) : daily
+  const chartData = source.map(d => ({ label: fmtDateLabel(d.date), revenue: d.revenue }))
 
   const maxRev = Math.max(...chartData.map(d => d.revenue), 0)
   const manyBars = chartData.length > 14
 
   return (
     <div className="bg-white rounded-lg p-4 border border-[#ede9fe] shadow-sm">
-      <p className="text-[#9ca3af] text-xs uppercase tracking-wider mb-2">
-        {useDaily ? 'Revenue by Date' : 'Revenue by Day'}
-      </p>
+      <p className="text-[#9ca3af] text-xs uppercase tracking-wider mb-2">Revenue by Date</p>
       <ResponsiveContainer width="100%" height={180}>
         <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: manyBars ? 20 : 0 }}>
           <XAxis
@@ -60,7 +47,7 @@ export function WeekdayBarChart({ weekday, daily, preset }: Props) {
           />
           <Bar dataKey="revenue" radius={[3, 3, 0, 0]} maxBarSize={30}>
             {chartData.map((d, i) => (
-              <Cell key={i} fill={d.revenue === maxRev ? '#ec4899' : '#7c3aed'} />
+              <Cell key={i} fill={d.revenue === maxRev ? '#16a34a' : '#7c3aed'} />
             ))}
           </Bar>
         </BarChart>
