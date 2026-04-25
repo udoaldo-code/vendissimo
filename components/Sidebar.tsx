@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 
@@ -16,10 +17,7 @@ export function Sidebar() {
   const nav = (
     <aside className="w-56 h-full bg-white border-r border-[#ede9fe] flex flex-col">
       <div className="p-4 border-b border-[#ede9fe] flex items-center justify-between">
-        <div>
-          <p className="text-[#7c3aed] font-bold text-sm tracking-wide">🏪 VENDISSIMO</p>
-          <p className="text-[#9ca3af] text-xs mt-0.5">Vending Machine KH</p>
-        </div>
+        <Image src="/logo.png" alt="Vendissimo" width={140} height={40} priority className="object-contain" />
         <button
           className="md:hidden text-[#9ca3af] hover:text-[#7c3aed] text-xl leading-none"
           onClick={() => setOpen(false)}
