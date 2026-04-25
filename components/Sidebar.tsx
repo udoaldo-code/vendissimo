@@ -59,16 +59,19 @@ export function Sidebar() {
         {nav}
       </div>
 
-      {/* Mobile hamburger */}
-      <button
-        className="md:hidden fixed top-4 left-4 z-40 p-2 rounded-md bg-white border border-[#ede9fe] shadow-sm text-[#7c3aed]"
-        onClick={() => setOpen(true)}
-        aria-label="Open menu"
-      >
-        <span className="block w-5 h-0.5 bg-current mb-1"></span>
-        <span className="block w-5 h-0.5 bg-current mb-1"></span>
-        <span className="block w-5 h-0.5 bg-current"></span>
-      </button>
+      {/* Mobile top bar */}
+      <div className="md:hidden fixed top-0 inset-x-0 z-40 h-14 bg-white border-b border-[#ede9fe] shadow-sm flex items-center px-4 gap-3">
+        <button
+          className="p-2 rounded-md text-[#7c3aed]"
+          onClick={() => setOpen(true)}
+          aria-label="Open menu"
+        >
+          <span className="block w-5 h-0.5 bg-current mb-1"></span>
+          <span className="block w-5 h-0.5 bg-current mb-1"></span>
+          <span className="block w-5 h-0.5 bg-current"></span>
+        </button>
+        <Image src="/logo.png" alt="Vendissimo" width={120} height={34} priority className="object-contain" />
+      </div>
 
       {/* Mobile drawer overlay */}
       {open && (

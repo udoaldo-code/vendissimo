@@ -15,7 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={`${geist.className} bg-[#faf5ff]`}>
         <Sidebar />
-        <div id="page-content" className="md:ml-56">
+        <div id="page-content" className="pt-14 md:pt-0 md:ml-56">
           {children}
         </div>
       </body>
