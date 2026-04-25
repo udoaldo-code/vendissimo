@@ -51,10 +51,10 @@ export function aggregateTransactions(
   const totalTransactions = transactions.length
   const unitsSold = transactions.reduce((s, t) => s + t.qty, 0)
 
-  // Days span for avg daily
-  const timestamps = transactions.map(t => parseTransactionDate(t.date).getTime())
-  const minTs = Math.min(...timestamps)
-  const maxTs = Math.max(...timestamps)
+  // Days span for avg daily (filter NaN in case of malformed dates)
+  const timestamps = transactions.map(t => parseTransactionDate(t.date).getTime()).filter(ts => !isNaN(ts))
+  const minTs = timestamps.length ? Math.min(...timestamps) : 0
+  const maxTs = timestamps.length ? Math.max(...timestamps) : 0
   const days = Math.max(1, Math.round((maxTs - minTs) / 86400000) + 1)
   const avgDailyRevenue = totalRevenue / days
 

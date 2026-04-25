@@ -1,8 +1,26 @@
 import type { Transaction, FilterState } from './types'
 
+const MONTH_ABBR: Record<string, number> = {
+  jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+  jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+}
+
 export function parseTransactionDate(dateStr: string): Date {
-  const [m, d, y] = dateStr.split('/').map(Number)
-  return new Date(y, m - 1, d)
+  if (!dateStr) return new Date(NaN)
+  // "M/D/YYYY" → "1/1/2026", "3/18/2026"
+  if (dateStr.includes('/')) {
+    const [m, d, y] = dateStr.split('/').map(Number)
+    return new Date(y, m - 1, d)
+  }
+  // "D-Mon-YY" → "2-Apr-26", "23-Apr-26"
+  const parts = dateStr.split('-')
+  if (parts.length === 3) {
+    const d = parseInt(parts[0])
+    const m = MONTH_ABBR[parts[1].toLowerCase()]
+    const y = 2000 + parseInt(parts[2])
+    if (!isNaN(d) && m !== undefined && !isNaN(y)) return new Date(y, m, d)
+  }
+  return new Date(NaN)
 }
 
 // Subsequence match (not substring): each char of `pattern` must appear in `text`
