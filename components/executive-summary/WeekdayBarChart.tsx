@@ -16,21 +16,21 @@ export function WeekdayBarChart({ data }: { data: WeekdayRevenue }) {
   const maxRev = Math.max(...chartData.map(d => d.revenue))
 
   return (
-    <div className="bg-[#292524] rounded-lg p-4">
-      <p className="text-[#a8a29e] text-xs uppercase tracking-wider mb-2">Revenue by Day</p>
+    <div className="bg-white rounded-lg p-4 border border-[#ede9fe] shadow-sm">
+      <p className="text-[#9ca3af] text-xs uppercase tracking-wider mb-2">Revenue by Day</p>
       <ResponsiveContainer width="100%" height={180}>
         <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-          <XAxis dataKey="day" tick={{ fill: '#a8a29e', fontSize: 11 }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fill: '#a8a29e', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}`} />
+          <XAxis dataKey="day" tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}`} />
           <Tooltip
-            contentStyle={{ background: '#292524', border: '1px solid #44403c', borderRadius: '6px' }}
-            labelStyle={{ color: '#e7e5e4' }}
+            contentStyle={{ background: '#ffffff', border: '1px solid #ede9fe', borderRadius: '6px' }}
+            labelStyle={{ color: '#1e1b4b' }}
             formatter={(v) => [`$${Number(v).toFixed(2)}`, 'Revenue']}
-            cursor={{ fill: '#44403c' }}
+            cursor={{ fill: '#f5f3ff' }}
           />
           <Bar dataKey="revenue" radius={[3, 3, 0, 0]} maxBarSize={30}>
             {chartData.map((d, i) => (
-              <Cell key={i} fill={d.revenue === maxRev ? '#fbbf24' : '#f97316'} />
+              <Cell key={i} fill={d.revenue === maxRev ? '#ec4899' : '#7c3aed'} />
             ))}
           </Bar>
         </BarChart>

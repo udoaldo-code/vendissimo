@@ -9,12 +9,12 @@ type SortDir = 'asc' | 'desc'
 
 const PAGE_SIZE = 100
 
-const thClass = 'text-left py-2 px-3 text-[#57534e] text-xs uppercase font-medium cursor-pointer hover:text-[#a8a29e] select-none whitespace-nowrap'
-const tdClass = 'py-2 px-3 text-[#a8a29e] text-xs whitespace-nowrap'
+const thClass = 'text-left py-2 px-3 text-[#9ca3af] text-xs uppercase font-medium cursor-pointer hover:text-[#7c3aed] select-none whitespace-nowrap'
+const tdClass = 'py-2 px-3 text-[#6b7280] text-xs whitespace-nowrap'
 
 function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
   if (sortKey !== col) return <span className="ml-1 opacity-30">↕</span>
-  return <span className="ml-1 text-[#f97316]">{sortDir === 'asc' ? '↑' : '↓'}</span>
+  return <span className="ml-1 text-[#7c3aed]">{sortDir === 'asc' ? '↑' : '↓'}</span>
 }
 
 export function TransactionsTable({ transactions }: { transactions: Transaction[] }) {
@@ -57,10 +57,10 @@ export function TransactionsTable({ transactions }: { transactions: Transaction[
   const pageRows = sorted.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
   return (
-    <div className="bg-[#292524] rounded-lg overflow-hidden">
+    <div className="bg-white rounded-lg border border-[#ede9fe] shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="border-b border-[#44403c]">
+          <thead className="border-b border-[#ede9fe]">
             <tr>
               {(['date', 'time', 'machine', 'location', 'product', 'unitPrice', 'qty', 'revenue'] as SortKey[]).map(col => (
                 <th key={col} className={thClass} onClick={() => toggleSort(col)}>
@@ -72,37 +72,37 @@ export function TransactionsTable({ transactions }: { transactions: Transaction[
           </thead>
           <tbody>
             {pageRows.map((t, i) => (
-              <tr key={i} className="border-b border-[#44403c]/50 hover:bg-[#44403c]/30">
+              <tr key={i} className="border-b border-[#ede9fe]/50 hover:bg-[#faf5ff]">
                 <td className={tdClass}>{t.date}</td>
-                <td className={`${tdClass} text-[#57534e]`}>{t.time}</td>
+                <td className={`${tdClass} text-[#9ca3af]`}>{t.time}</td>
                 <td className={tdClass}>{t.machine}</td>
                 <td className={tdClass}>{t.location}</td>
-                <td className={`${tdClass} text-[#e7e5e4]`}>{t.product}</td>
+                <td className={`${tdClass} text-[#1e1b4b]`}>{t.product}</td>
                 <td className={`${tdClass} text-right`}>${t.unitPrice.toFixed(2)}</td>
                 <td className={`${tdClass} text-right`}>{t.qty}</td>
-                <td className={`${tdClass} text-right text-[#f97316]`}>${(t.unitPrice * t.qty).toFixed(2)}</td>
+                <td className={`${tdClass} text-right text-[#7c3aed] font-medium`}>${(t.unitPrice * t.qty).toFixed(2)}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
       {totalPages > 1 && (
-        <div className="flex items-center justify-between px-4 py-3 border-t border-[#44403c]">
-          <span className="text-[#57534e] text-xs">
+        <div className="flex items-center justify-between px-4 py-3 border-t border-[#ede9fe]">
+          <span className="text-[#9ca3af] text-xs">
             Page {page + 1} of {totalPages} · {sorted.length.toLocaleString()} rows
           </span>
           <div className="flex gap-2">
             <button
               onClick={() => setPage(p => Math.max(0, p - 1))}
               disabled={page === 0}
-              className="px-3 py-1 text-xs rounded bg-[#44403c] text-[#a8a29e] hover:text-[#e7e5e4] disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-3 py-1 text-xs rounded bg-[#f5f3ff] text-[#6b7280] hover:text-[#7c3aed] disabled:opacity-40 disabled:cursor-not-allowed border border-[#ede9fe]"
             >
               ← Prev
             </button>
             <button
               onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
               disabled={page === totalPages - 1}
-              className="px-3 py-1 text-xs rounded bg-[#44403c] text-[#a8a29e] hover:text-[#e7e5e4] disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-3 py-1 text-xs rounded bg-[#f5f3ff] text-[#6b7280] hover:text-[#7c3aed] disabled:opacity-40 disabled:cursor-not-allowed border border-[#ede9fe]"
             >
               Next →
             </button>

@@ -12,30 +12,30 @@ export function MonthlyRevenueChart({ data }: { data: MonthlyRow[] }) {
   }))
 
   return (
-    <div className="bg-[#292524] rounded-lg p-4">
-      <p className="text-[#a8a29e] text-xs uppercase tracking-wider mb-4">Monthly Revenue</p>
+    <div className="bg-white rounded-lg p-4 border border-[#ede9fe] shadow-sm">
+      <p className="text-[#9ca3af] text-xs uppercase tracking-wider mb-4">Monthly Revenue</p>
       <ResponsiveContainer width="100%" height={200}>
         <BarChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#44403c" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#ede9fe" vertical={false} />
           <XAxis
             dataKey="month"
-            tick={{ fill: '#a8a29e', fontSize: 11 }}
+            tick={{ fill: '#6b7280', fontSize: 11 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
-            tick={{ fill: '#a8a29e', fontSize: 11 }}
+            tick={{ fill: '#6b7280', fontSize: 11 }}
             axisLine={false}
             tickLine={false}
             tickFormatter={v => `$${v}`}
           />
           <Tooltip
-            contentStyle={{ background: '#292524', border: '1px solid #44403c', borderRadius: '6px' }}
-            labelStyle={{ color: '#e7e5e4', fontWeight: 600 }}
+            contentStyle={{ background: '#ffffff', border: '1px solid #ede9fe', borderRadius: '6px' }}
+            labelStyle={{ color: '#1e1b4b', fontWeight: 600 }}
             formatter={(v) => [`$${Number(v).toFixed(2)}`, 'Revenue']}
-            cursor={{ fill: '#44403c' }}
+            cursor={{ fill: '#f5f3ff' }}
           />
-          <Bar dataKey="revenue" fill="#f97316" radius={[4, 4, 0, 0]} maxBarSize={40} />
+          <Bar dataKey="revenue" fill="#7c3aed" radius={[4, 4, 0, 0]} maxBarSize={40} />
         </BarChart>
       </ResponsiveContainer>
     </div>

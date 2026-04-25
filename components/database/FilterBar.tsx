@@ -18,9 +18,9 @@ export function FilterBar({ filters, onChange, machines, locations, products }: 
   }
 
   const selectClass =
-    'bg-[#292524] border border-[#44403c] rounded-md px-2 py-1.5 text-sm text-[#e7e5e4] focus:outline-none focus:border-[#f97316] min-w-[140px]'
+    'bg-white border border-[#ede9fe] rounded-md px-2 py-1.5 text-sm text-[#1e1b4b] focus:outline-none focus:border-[#7c3aed] min-w-[130px]'
   const inputClass =
-    'bg-[#292524] border border-[#44403c] rounded-md px-2 py-1.5 text-sm text-[#e7e5e4] placeholder-[#57534e] focus:outline-none focus:border-[#f97316]'
+    'bg-white border border-[#ede9fe] rounded-md px-2 py-1.5 text-sm text-[#1e1b4b] placeholder-[#9ca3af] focus:outline-none focus:border-[#7c3aed]'
 
   return (
     <div className="flex flex-wrap gap-2 items-center">
@@ -29,7 +29,7 @@ export function FilterBar({ filters, onChange, machines, locations, products }: 
         placeholder="Search product or machine…"
         value={filters.search}
         onChange={e => set('search', e.target.value)}
-        className={`${inputClass} w-52`}
+        className={`${inputClass} w-full sm:w-52`}
       />
       <select value={filters.machine} onChange={e => set('machine', e.target.value)} className={selectClass}>
         <option value="">All Machines</option>
@@ -60,7 +60,7 @@ export function FilterBar({ filters, onChange, machines, locations, products }: 
       {Object.values(filters).some(Boolean) && (
         <button
           onClick={() => onChange(EMPTY_FILTERS)}
-          className="text-xs text-[#a8a29e] hover:text-[#e7e5e4] px-2 py-1.5 border border-[#44403c] rounded-md hover:border-[#57534e] transition-colors"
+          className="text-xs text-[#6b7280] hover:text-[#7c3aed] px-2 py-1.5 border border-[#ede9fe] rounded-md hover:border-[#ddd6fe] transition-colors"
         >
           Clear
         </button>

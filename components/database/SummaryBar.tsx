@@ -7,21 +7,21 @@ export function SummaryBar({ transactions, total }: Props) {
   const units = transactions.reduce((sum, t) => sum + t.qty, 0)
 
   return (
-    <div className="flex items-center gap-6 bg-[#292524] rounded-lg px-4 py-3 text-sm">
+    <div className="flex flex-wrap items-center gap-4 bg-white rounded-lg px-4 py-3 text-sm border border-[#ede9fe] shadow-sm">
       <div>
-        <span className="text-[#57534e] mr-2">Showing</span>
-        <span className="text-[#fbbf24] font-bold">{transactions.length.toLocaleString()}</span>
-        <span className="text-[#57534e]"> / {total.toLocaleString()} rows</span>
+        <span className="text-[#9ca3af] mr-2">Showing</span>
+        <span className="text-[#7c3aed] font-bold">{transactions.length.toLocaleString()}</span>
+        <span className="text-[#9ca3af]"> / {total.toLocaleString()} rows</span>
       </div>
-      <div className="h-4 w-px bg-[#44403c]" />
+      <div className="h-4 w-px bg-[#ede9fe] hidden sm:block" />
       <div>
-        <span className="text-[#57534e] mr-2">Revenue</span>
-        <span className="text-[#f97316] font-bold">${revenue.toFixed(2)}</span>
+        <span className="text-[#9ca3af] mr-2">Revenue</span>
+        <span className="text-[#ec4899] font-bold">${revenue.toFixed(2)}</span>
       </div>
-      <div className="h-4 w-px bg-[#44403c]" />
+      <div className="h-4 w-px bg-[#ede9fe] hidden sm:block" />
       <div>
-        <span className="text-[#57534e] mr-2">Units</span>
-        <span className="text-[#e7e5e4] font-bold">{units.toLocaleString()}</span>
+        <span className="text-[#9ca3af] mr-2">Units</span>
+        <span className="text-[#1e1b4b] font-bold">{units.toLocaleString()}</span>
       </div>
     </div>
   )
