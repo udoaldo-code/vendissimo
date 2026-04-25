@@ -49,7 +49,7 @@ export function ExecSummaryClient({ transactions, categoryMap }: Props) {
       <MonthlyRevenueChart data={data.monthly} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <LocationPieChart machines={data.machines} />
-        <WeekdayBarChart data={data.weekday} />
+        <WeekdayBarChart weekday={data.weekday} daily={data.daily} preset={preset} />
       </div>
       <TopProductsTable products={data.products} />
       <MachinePerformanceTable machines={data.machines} />

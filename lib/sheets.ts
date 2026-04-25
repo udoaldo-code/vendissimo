@@ -102,7 +102,7 @@ export function parseExecSummary(text: string): ExecSummaryData {
     sat: parseNum(wdVals?.[7] ?? ''),
   }
 
-  return { kpis, monthly, products, machines, weekday }
+  return { kpis, monthly, products, machines, weekday, daily: [] }
 }
 
 export function parseDatabase(text: string): Transaction[] {

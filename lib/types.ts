@@ -44,12 +44,15 @@ export type WeekdayRevenue = {
   sat: number
 }
 
+export type DailyRevenue = { date: string; revenue: number }
+
 export type ExecSummaryData = {
   kpis: KPIs
   monthly: MonthlyRow[]
   products: ProductRow[]
   machines: MachineRow[]
   weekday: WeekdayRevenue
+  daily: DailyRevenue[]
 }
 
 export type Transaction = {

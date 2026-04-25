@@ -1,4 +1,4 @@
-import type { Transaction, KPIs, MonthlyRow, ProductRow, MachineRow, WeekdayRevenue, ExecSummaryData } from './types'
+import type { Transaction, KPIs, MonthlyRow, ProductRow, MachineRow, WeekdayRevenue, DailyRevenue, ExecSummaryData } from './types'
 import { parseTransactionDate } from './filter-utils'
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -44,6 +44,7 @@ export function aggregateTransactions(
       products: [],
       machines: [],
       weekday: { sun: 0, mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0 },
+      daily: [],
     }
   }
 
@@ -136,8 +137,20 @@ export function aggregateTransactions(
 
   // Weekday
   const wd = [0, 0, 0, 0, 0, 0, 0]
-  for (const t of transactions) wd[parseTransactionDate(t.date).getDay()] += t.unitPrice * t.qty
+  for (const t of transactions) {
+    const day = parseTransactionDate(t.date).getDay()
+    if (!isNaN(day)) wd[day] += t.unitPrice * t.qty
+  }
   const weekday: WeekdayRevenue = { sun: wd[0], mon: wd[1], tue: wd[2], wed: wd[3], thu: wd[4], fri: wd[5], sat: wd[6] }
 
-  return { kpis, monthly, products, machines, weekday }
+  // Daily (individual date → revenue, sorted chronologically)
+  const dailyAcc: Record<string, number> = {}
+  for (const t of transactions) {
+    if (t.date) dailyAcc[t.date] = (dailyAcc[t.date] ?? 0) + t.unitPrice * t.qty
+  }
+  const daily: DailyRevenue[] = Object.entries(dailyAcc)
+    .map(([date, revenue]) => ({ date, revenue }))
+    .sort((a, b) => parseTransactionDate(a.date).getTime() - parseTransactionDate(b.date).getTime())
+
+  return { kpis, monthly, products, machines, weekday, daily }
 }
