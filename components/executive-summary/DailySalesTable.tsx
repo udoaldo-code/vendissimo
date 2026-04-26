@@ -33,7 +33,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
   const { dates, machines, locationTotals, grandTotal } = dailySales
 
   // Cap All Time to last 14 dates; others show all
-  const displayDates = preset === 'all' ? dates.slice(-14) : dates
+  const displayDates = (preset === 'all' ? dates.slice(-14) : dates).slice().reverse()
 
   if (displayDates.length === 0 || machines.length === 0) return null
 
