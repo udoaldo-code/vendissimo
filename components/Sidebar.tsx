@@ -17,7 +17,7 @@ export function Sidebar() {
   const nav = (
     <aside className="w-56 h-full bg-white border-r border-[#ede9fe] flex flex-col">
       <div className="p-4 border-b border-[#ede9fe] flex items-center justify-between">
-        <Image src="/logo.png" alt="Vendissimo" width={140} height={40} priority className="object-contain" />
+        <Image src="/logo.png" alt="Vendissimo" width={140} height={40} priority className="object-contain" style={{ height: 'auto' }} />
         <button
           className="md:hidden text-[#9ca3af] hover:text-[#7c3aed] text-xl leading-none"
           onClick={() => setOpen(false)}
@@ -70,7 +70,7 @@ export function Sidebar() {
           <span className="block w-5 h-0.5 bg-current mb-1"></span>
           <span className="block w-5 h-0.5 bg-current"></span>
         </button>
-        <Image src="/logo.png" alt="Vendissimo" width={120} height={34} priority className="object-contain" />
+        <Image src="/logo.png" alt="Vendissimo" width={120} height={34} priority className="object-contain" style={{ height: 'auto' }} />
       </div>
 
       {/* Mobile drawer overlay */}
