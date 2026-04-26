@@ -53,6 +53,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
 
   const tdBase = 'py-1.5 px-2 text-xs whitespace-nowrap border-b border-[#ede9fe]'
   const numCell = `${tdBase} text-right tabular-nums`
+  const stickyStyle = { boxShadow: '2px 0 4px rgba(0,0,0,0.06)' }
 
   function entry(daily: Record<string, { qty: number; rev: number }>, date: string) {
     const e = daily[date]
@@ -72,39 +73,39 @@ export function DailySalesTable({ dailySales, preset }: Props) {
           <thead>
             {/* Row 1: day names */}
             <tr className="bg-[#f5f3ff]">
-              <th className="sticky left-0 z-10 bg-[#f5f3ff] py-1.5 px-3 text-left text-[#9ca3af] font-medium whitespace-nowrap border-b border-[#ede9fe] min-w-[160px]" style={{ boxShadow: '2px 0 4px rgba(0,0,0,0.06)' }}>
+              <th className="sticky left-0 z-10 bg-[#f5f3ff] py-1.5 px-3 text-left text-[#9ca3af] font-medium whitespace-nowrap border-b border-[#ede9fe] min-w-[160px]" style={stickyStyle}>
                 Name of Machine
+              </th>
+              <th colSpan={2} className="py-1.5 px-2 text-center text-[#7c3aed] font-semibold border-b border-[#ede9fe] border-l border-[#ede9fe]">
+                TOTAL
               </th>
               {displayDates.map(d => (
                 <th key={d} colSpan={2} className="py-1.5 px-2 text-center text-[#6b7280] font-medium border-b border-[#ede9fe] border-l border-[#ede9fe]">
                   {fmtDateHeader(d).day}
                 </th>
               ))}
-              <th colSpan={2} className="py-1.5 px-2 text-center text-[#7c3aed] font-semibold border-b border-[#ede9fe] border-l border-[#ede9fe]">
-                TOTAL
-              </th>
             </tr>
             {/* Row 2: dates */}
             <tr className="bg-[#f5f3ff]">
-              <th className="sticky left-0 z-10 bg-[#f5f3ff] border-b border-[#ede9fe]" style={{ boxShadow: '2px 0 4px rgba(0,0,0,0.06)' }} />
+              <th className="sticky left-0 z-10 bg-[#f5f3ff] border-b border-[#ede9fe]" style={stickyStyle} />
+              <th colSpan={2} className="border-b border-[#ede9fe] border-l border-[#ede9fe]" />
               {displayDates.map(d => (
                 <th key={d} colSpan={2} className="py-1 px-2 text-center text-[#6b7280] font-normal border-b border-[#ede9fe] border-l border-[#ede9fe]">
                   {fmtDateHeader(d).date}
                 </th>
               ))}
-              <th colSpan={2} className="border-b border-[#ede9fe] border-l border-[#ede9fe]" />
             </tr>
             {/* Row 3: Qty / Rev sub-headers */}
             <tr className="bg-[#faf5ff]">
-              <th className="sticky left-0 z-10 bg-[#faf5ff] border-b border-[#ede9fe]" style={{ boxShadow: '2px 0 4px rgba(0,0,0,0.06)' }} />
+              <th className="sticky left-0 z-10 bg-[#faf5ff] border-b border-[#ede9fe]" style={stickyStyle} />
+              <th className="py-1 px-2 text-right text-[#7c3aed] font-semibold border-b border-[#ede9fe] border-l border-[#ede9fe] whitespace-nowrap">Qty</th>
+              <th className="py-1 px-2 text-right text-[#7c3aed] font-semibold border-b border-[#ede9fe] whitespace-nowrap">Rev</th>
               {displayDates.map(d => (
                 <Fragment key={d}>
                   <th className="py-1 px-2 text-right text-[#9ca3af] font-medium border-b border-[#ede9fe] border-l border-[#ede9fe] whitespace-nowrap">Qty</th>
                   <th className="py-1 px-2 text-right text-[#9ca3af] font-medium border-b border-[#ede9fe] whitespace-nowrap">Rev</th>
                 </Fragment>
               ))}
-              <th className="py-1 px-2 text-right text-[#9ca3af] font-medium border-b border-[#ede9fe] border-l border-[#ede9fe] whitespace-nowrap">Qty</th>
-              <th className="py-1 px-2 text-right text-[#9ca3af] font-medium border-b border-[#ede9fe] whitespace-nowrap">Rev</th>
             </tr>
           </thead>
           <tbody>
@@ -118,6 +119,8 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                     <td className={`sticky left-0 z-10 ${tdBase} font-semibold border-l-4`} style={{ color, borderLeftColor: color, backgroundColor: locationBg(loc), boxShadow: '2px 0 4px rgba(0,0,0,0.06)' }}>
                       {loc}
                     </td>
+                    <td className={`${numCell} border-l border-[#ede9fe] font-semibold`} style={{ color }}>{lt.totalQty}</td>
+                    <td className={`${numCell} font-semibold`} style={{ color }}>${lt.totalRev.toFixed(2)}</td>
                     {displayDates.map(d => {
                       const e = entry(lt.daily, d)
                       return (
@@ -131,13 +134,13 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                         </Fragment>
                       )
                     })}
-                    <td className={`${numCell} border-l border-[#ede9fe] font-semibold`} style={{ color }}>{lt.totalQty}</td>
-                    <td className={`${numCell} font-semibold`} style={{ color }}>${lt.totalRev.toFixed(2)}</td>
                   </tr>
                   {/* Machine rows */}
                   {byLocation[loc].map(m => (
                     <tr key={m.machine} className="hover:bg-[#faf5ff]">
-                      <td className={`sticky left-0 z-10 bg-white ${tdBase} text-[#1e1b4b] pl-5`} style={{ boxShadow: '2px 0 4px rgba(0,0,0,0.06)' }}>{m.machine}</td>
+                      <td className={`sticky left-0 z-10 bg-white ${tdBase} text-[#1e1b4b] pl-5`} style={stickyStyle}>{m.machine}</td>
+                      <td className={`${numCell} text-[#6b7280] border-l border-[#ede9fe]`}>{m.totalQty}</td>
+                      <td className={`${numCell} text-[#6b7280]`}>${m.totalRev.toFixed(2)}</td>
                       {displayDates.map(d => {
                         const e = entry(m.daily, d)
                         return (
@@ -151,8 +154,6 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                           </Fragment>
                         )
                       })}
-                      <td className={`${numCell} text-[#6b7280] border-l border-[#ede9fe]`}>{m.totalQty}</td>
-                      <td className={`${numCell} text-[#6b7280]`}>${m.totalRev.toFixed(2)}</td>
                     </tr>
                   ))}
                 </Fragment>
@@ -162,6 +163,12 @@ export function DailySalesTable({ dailySales, preset }: Props) {
             <tr className="bg-[#1e1b4b]">
               <td className="sticky left-0 z-10 bg-[#1e1b4b] py-2 px-3 text-white font-bold text-xs whitespace-nowrap" style={{ boxShadow: '2px 0 4px rgba(0,0,0,0.2)' }}>
                 Grand Total
+              </td>
+              <td className="py-2 px-2 text-right text-[#a78bfa] font-bold text-xs tabular-nums whitespace-nowrap border-l border-white/20">
+                {grandTotal.totalQty}
+              </td>
+              <td className="py-2 px-2 text-right text-[#a78bfa] font-bold text-xs tabular-nums whitespace-nowrap">
+                ${grandTotal.totalRev.toFixed(2)}
               </td>
               {displayDates.map(d => {
                 const e = entry(grandTotal.daily, d)
@@ -176,12 +183,6 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                   </Fragment>
                 )
               })}
-              <td className="py-2 px-2 text-right text-[#a78bfa] font-bold text-xs tabular-nums whitespace-nowrap border-l border-white/20">
-                {grandTotal.totalQty}
-              </td>
-              <td className="py-2 px-2 text-right text-[#a78bfa] font-bold text-xs tabular-nums whitespace-nowrap">
-                ${grandTotal.totalRev.toFixed(2)}
-              </td>
             </tr>
           </tbody>
         </table>
