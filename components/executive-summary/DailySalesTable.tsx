@@ -53,6 +53,8 @@ export function DailySalesTable({ dailySales, preset }: Props) {
 
   const tdBase = 'py-1.5 px-2 text-xs whitespace-nowrap border-b border-[#ede9fe]'
   const numCell = `${tdBase} text-right tabular-nums`
+  // Sticky name column: wraps on mobile, fixed on desktop
+  const stickyTd = 'py-1.5 px-2 text-xs border-b border-[#ede9fe] min-w-[90px] md:min-w-[150px] max-w-[110px] md:max-w-[200px] break-words'
   const stickyStyle = { boxShadow: '2px 0 4px rgba(0,0,0,0.06)' }
 
   function entry(daily: Record<string, { qty: number; rev: number }>, date: string) {
@@ -73,7 +75,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
           <thead>
             {/* Row 1: day names */}
             <tr className="bg-[#f5f3ff]">
-              <th className="sticky left-0 z-10 bg-[#f5f3ff] py-1.5 px-3 text-left text-[#9ca3af] font-medium whitespace-nowrap border-b border-[#ede9fe] min-w-[160px]" style={stickyStyle}>
+              <th className={`sticky left-0 z-10 bg-[#f5f3ff] text-left text-[#9ca3af] font-medium ${stickyTd}`} style={stickyStyle}>
                 Name of Machine
               </th>
               <th colSpan={2} className="py-1.5 px-2 text-center text-[#7c3aed] font-semibold border-b border-[#ede9fe] border-l border-[#ede9fe]">
@@ -116,7 +118,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                 <Fragment key={loc}>
                   {/* Location header row */}
                   <tr style={{ backgroundColor: color + '18' }}>
-                    <td className={`sticky left-0 z-10 ${tdBase} font-semibold border-l-4`} style={{ color, borderLeftColor: color, backgroundColor: locationBg(loc), boxShadow: '2px 0 4px rgba(0,0,0,0.06)' }}>
+                    <td className={`sticky left-0 z-10 ${stickyTd} font-semibold border-l-4`} style={{ color, borderLeftColor: color, backgroundColor: locationBg(loc), boxShadow: '2px 0 4px rgba(0,0,0,0.06)' }}>
                       {loc}
                     </td>
                     <td className={`${numCell} border-l border-[#ede9fe] font-semibold`} style={{ color }}>{lt.totalQty}</td>
@@ -138,7 +140,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                   {/* Machine rows */}
                   {byLocation[loc].map(m => (
                     <tr key={m.machine} className="hover:bg-[#faf5ff]">
-                      <td className={`sticky left-0 z-10 bg-white ${tdBase} text-[#1e1b4b] pl-5`} style={stickyStyle}>{m.machine}</td>
+                      <td className={`sticky left-0 z-10 bg-white ${stickyTd} text-[#1e1b4b] pl-5`} style={stickyStyle}>{m.machine}</td>
                       <td className={`${numCell} text-[#6b7280] border-l border-[#ede9fe]`}>{m.totalQty}</td>
                       <td className={`${numCell} text-[#6b7280]`}>${m.totalRev.toFixed(2)}</td>
                       {displayDates.map(d => {
@@ -161,7 +163,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
             })}
             {/* Grand Total */}
             <tr className="bg-[#1e1b4b]">
-              <td className="sticky left-0 z-10 bg-[#1e1b4b] py-2 px-3 text-white font-bold text-xs whitespace-nowrap" style={{ boxShadow: '2px 0 4px rgba(0,0,0,0.2)' }}>
+              <td className={`sticky left-0 z-10 bg-[#1e1b4b] ${stickyTd} text-white font-bold`} style={{ boxShadow: '2px 0 4px rgba(0,0,0,0.2)' }}>
                 Grand Total
               </td>
               <td className="py-2 px-2 text-right text-[#a78bfa] font-bold text-xs tabular-nums whitespace-nowrap border-l border-white/20">
