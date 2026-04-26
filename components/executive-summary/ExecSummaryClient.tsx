@@ -10,6 +10,7 @@ import { LocationPieChart } from './LocationPieChart'
 import { WeekdayBarChart } from './WeekdayBarChart'
 import { TopProductsTable } from './TopProductsTable'
 import { MachinePerformanceTable } from './MachinePerformanceTable'
+import { DailySalesTable } from './DailySalesTable'
 
 type Props = {
   transactions: Transaction[]
@@ -53,6 +54,7 @@ export function ExecSummaryClient({ transactions, categoryMap }: Props) {
       </div>
       <TopProductsTable products={data.products} />
       <MachinePerformanceTable machines={data.machines} />
+      <DailySalesTable dailySales={data.dailySales} preset={preset} />
     </>
   )
 
