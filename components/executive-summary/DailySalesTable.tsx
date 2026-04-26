@@ -1,5 +1,6 @@
 'use client'
 
+import { Fragment } from 'react'
 import type { DailySalesData } from '@/lib/types'
 import type { DatePreset } from './DateFilter'
 import { parseTransactionDate } from '@/lib/filter-utils'
@@ -32,12 +33,10 @@ type Props = {
 export function DailySalesTable({ dailySales, preset }: Props) {
   const { dates, machines, locationTotals, grandTotal } = dailySales
 
-  // Cap All Time to last 14 dates; others show all
   const displayDates = (preset === 'all' ? dates.slice(-14) : dates).slice().reverse()
 
   if (displayDates.length === 0 || machines.length === 0) return null
 
-  // Group machines by location in order
   const locations: string[] = []
   const byLocation: Record<string, typeof machines> = {}
   for (const m of machines) {
@@ -50,7 +49,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
 
   function entry(daily: Record<string, { qty: number; rev: number }>, date: string) {
     const e = daily[date]
-    return e ? { qty: e.qty, rev: e.rev } : { qty: 0, rev: 0 }
+    return e ?? { qty: 0, rev: 0 }
   }
 
   return (
@@ -69,14 +68,11 @@ export function DailySalesTable({ dailySales, preset }: Props) {
               <th className="sticky left-0 z-10 bg-[#f5f3ff] py-1.5 px-3 text-left text-[#9ca3af] font-medium whitespace-nowrap border-b border-[#ede9fe] min-w-[160px]">
                 Name of Machine
               </th>
-              {displayDates.map(d => {
-                const { day } = fmtDateHeader(d)
-                return (
-                  <th key={d} colSpan={2} className="py-1.5 px-2 text-center text-[#6b7280] font-medium border-b border-[#ede9fe] border-l border-[#ede9fe]">
-                    {day}
-                  </th>
-                )
-              })}
+              {displayDates.map(d => (
+                <th key={d} colSpan={2} className="py-1.5 px-2 text-center text-[#6b7280] font-medium border-b border-[#ede9fe] border-l border-[#ede9fe]">
+                  {fmtDateHeader(d).day}
+                </th>
+              ))}
               <th colSpan={2} className="py-1.5 px-2 text-center text-[#7c3aed] font-semibold border-b border-[#ede9fe] border-l border-[#ede9fe]">
                 TOTAL
               </th>
@@ -84,24 +80,21 @@ export function DailySalesTable({ dailySales, preset }: Props) {
             {/* Row 2: dates */}
             <tr className="bg-[#f5f3ff]">
               <th className="sticky left-0 z-10 bg-[#f5f3ff] border-b border-[#ede9fe]" />
-              {displayDates.map(d => {
-                const { date } = fmtDateHeader(d)
-                return (
-                  <th key={d} colSpan={2} className="py-1 px-2 text-center text-[#6b7280] font-normal border-b border-[#ede9fe] border-l border-[#ede9fe]">
-                    {date}
-                  </th>
-                )
-              })}
+              {displayDates.map(d => (
+                <th key={d} colSpan={2} className="py-1 px-2 text-center text-[#6b7280] font-normal border-b border-[#ede9fe] border-l border-[#ede9fe]">
+                  {fmtDateHeader(d).date}
+                </th>
+              ))}
               <th colSpan={2} className="border-b border-[#ede9fe] border-l border-[#ede9fe]" />
             </tr>
             {/* Row 3: Qty / Rev sub-headers */}
             <tr className="bg-[#faf5ff]">
               <th className="sticky left-0 z-10 bg-[#faf5ff] border-b border-[#ede9fe]" />
               {displayDates.map(d => (
-                <>
-                  <th key={`${d}-qty`} className="py-1 px-2 text-right text-[#9ca3af] font-medium border-b border-[#ede9fe] border-l border-[#ede9fe] whitespace-nowrap">Qty</th>
-                  <th key={`${d}-rev`} className="py-1 px-2 text-right text-[#9ca3af] font-medium border-b border-[#ede9fe] whitespace-nowrap">Rev</th>
-                </>
+                <Fragment key={d}>
+                  <th className="py-1 px-2 text-right text-[#9ca3af] font-medium border-b border-[#ede9fe] border-l border-[#ede9fe] whitespace-nowrap">Qty</th>
+                  <th className="py-1 px-2 text-right text-[#9ca3af] font-medium border-b border-[#ede9fe] whitespace-nowrap">Rev</th>
+                </Fragment>
               ))}
               <th className="py-1 px-2 text-right text-[#9ca3af] font-medium border-b border-[#ede9fe] border-l border-[#ede9fe] whitespace-nowrap">Qty</th>
               <th className="py-1 px-2 text-right text-[#9ca3af] font-medium border-b border-[#ede9fe] whitespace-nowrap">Rev</th>
@@ -112,23 +105,23 @@ export function DailySalesTable({ dailySales, preset }: Props) {
               const lt = locationTotals[loc]
               const color = locationColor(loc)
               return (
-                <>
+                <Fragment key={loc}>
                   {/* Location header row */}
-                  <tr key={`loc-${loc}`} style={{ backgroundColor: color + '18' }}>
+                  <tr style={{ backgroundColor: color + '18' }}>
                     <td className={`sticky left-0 z-10 ${tdBase} font-semibold border-l-4`} style={{ color, borderLeftColor: color, backgroundColor: color + '18' }}>
                       {loc}
                     </td>
                     {displayDates.map(d => {
                       const e = entry(lt.daily, d)
                       return (
-                        <>
-                          <td key={`${loc}-${d}-qty`} className={`${numCell} border-l border-[#ede9fe] font-medium`} style={{ color }}>
+                        <Fragment key={d}>
+                          <td className={`${numCell} border-l border-[#ede9fe] font-medium`} style={{ color }}>
                             {e.qty > 0 ? e.qty : ''}
                           </td>
-                          <td key={`${loc}-${d}-rev`} className={`${numCell} font-medium`} style={{ color }}>
+                          <td className={`${numCell} font-medium`} style={{ color }}>
                             {e.rev > 0 ? `$${e.rev.toFixed(2)}` : ''}
                           </td>
-                        </>
+                        </Fragment>
                       )
                     })}
                     <td className={`${numCell} border-l border-[#ede9fe] font-semibold`} style={{ color }}>{lt.totalQty}</td>
@@ -136,26 +129,26 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                   </tr>
                   {/* Machine rows */}
                   {byLocation[loc].map(m => (
-                    <tr key={`${loc}-${m.machine}`} className="hover:bg-[#faf5ff]">
+                    <tr key={m.machine} className="hover:bg-[#faf5ff]">
                       <td className={`sticky left-0 z-10 bg-white ${tdBase} text-[#1e1b4b] pl-5`}>{m.machine}</td>
                       {displayDates.map(d => {
                         const e = entry(m.daily, d)
                         return (
-                          <>
-                            <td key={`${m.machine}-${d}-qty`} className={`${numCell} text-[#6b7280] border-l border-[#ede9fe]`}>
+                          <Fragment key={d}>
+                            <td className={`${numCell} text-[#6b7280] border-l border-[#ede9fe]`}>
                               {e.qty > 0 ? e.qty : ''}
                             </td>
-                            <td key={`${m.machine}-${d}-rev`} className={`${numCell} text-[#6b7280]`}>
+                            <td className={`${numCell} text-[#6b7280]`}>
                               {e.rev > 0 ? `$${e.rev.toFixed(2)}` : ''}
                             </td>
-                          </>
+                          </Fragment>
                         )
                       })}
                       <td className={`${numCell} text-[#6b7280] border-l border-[#ede9fe]`}>{m.totalQty}</td>
                       <td className={`${numCell} text-[#6b7280]`}>${m.totalRev.toFixed(2)}</td>
                     </tr>
                   ))}
-                </>
+                </Fragment>
               )
             })}
             {/* Grand Total */}
@@ -166,14 +159,14 @@ export function DailySalesTable({ dailySales, preset }: Props) {
               {displayDates.map(d => {
                 const e = entry(grandTotal.daily, d)
                 return (
-                  <>
-                    <td key={`grand-${d}-qty`} className="py-2 px-2 text-right text-white font-medium text-xs tabular-nums whitespace-nowrap border-l border-white/20">
+                  <Fragment key={d}>
+                    <td className="py-2 px-2 text-right text-white font-medium text-xs tabular-nums whitespace-nowrap border-l border-white/20">
                       {e.qty > 0 ? e.qty : ''}
                     </td>
-                    <td key={`grand-${d}-rev`} className="py-2 px-2 text-right text-white font-medium text-xs tabular-nums whitespace-nowrap">
+                    <td className="py-2 px-2 text-right text-white font-medium text-xs tabular-nums whitespace-nowrap">
                       {e.rev > 0 ? `$${e.rev.toFixed(2)}` : ''}
                     </td>
-                  </>
+                  </Fragment>
                 )
               })}
               <td className="py-2 px-2 text-right text-[#a78bfa] font-bold text-xs tabular-nums whitespace-nowrap border-l border-white/20">
