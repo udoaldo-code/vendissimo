@@ -12,12 +12,13 @@ export function parseTransactionDate(dateStr: string): Date {
     const [m, d, y] = dateStr.split('/').map(Number)
     return new Date(y, m - 1, d)
   }
-  // "D-Mon-YY" → "2-Apr-26", "23-Apr-26"
+  // "D-Mon-YY" or "D-Mon-YYYY" → "2-Apr-26", "23-Apr-26", "26-Apr-2026"
   const parts = dateStr.split('-')
   if (parts.length === 3) {
     const d = parseInt(parts[0])
     const m = MONTH_ABBR[parts[1].toLowerCase()]
-    const y = 2000 + parseInt(parts[2])
+    const yRaw = parseInt(parts[2])
+    const y = yRaw < 100 ? 2000 + yRaw : yRaw
     if (!isNaN(d) && m !== undefined && !isNaN(y)) return new Date(y, m, d)
   }
   return new Date(NaN)
