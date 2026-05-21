@@ -73,7 +73,7 @@ export function TransactionsTable({ transactions }: { transactions: Transaction[
           </thead>
           <tbody>
             {pageRows.map((t, i) => (
-              <tr key={i} className="border-b border-border/50 hover:bg-background">
+              <tr key={i} className="border-b border-border/50 hover:bg-surface-hover">
                 <td className={tdClass}>{t.date}</td>
                 <td className={`${tdClass} text-muted`}>{t.time}</td>
                 <td className={tdClass}>{t.machine}</td>
