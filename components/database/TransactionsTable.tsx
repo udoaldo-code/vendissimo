@@ -23,6 +23,7 @@ export function TransactionsTable({ transactions }: { transactions: Transaction[
   const [page, setPage] = useState(0)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(0)
   }, [transactions])
 
