@@ -51,10 +51,10 @@ export function DailySalesTable({ dailySales, preset }: Props) {
     byLocation[m.location].push(m)
   }
 
-  const tdBase = 'py-1.5 px-2 text-xs whitespace-nowrap border-b border-[#ede9fe]'
+  const tdBase = 'py-1.5 px-2 text-xs whitespace-nowrap border-b border-border'
   const numCell = `${tdBase} text-right tabular-nums`
   // Sticky name column: wraps on mobile, fixed on desktop
-  const stickyTd = 'py-1.5 px-2 text-xs border-b border-[#ede9fe] min-w-[90px] md:min-w-[150px] max-w-[110px] md:max-w-[200px] break-words'
+  const stickyTd = 'py-1.5 px-2 text-xs border-b border-border min-w-[90px] md:min-w-[150px] max-w-[110px] md:max-w-[200px] break-words'
   const stickyStyle = { boxShadow: '2px 0 4px rgba(0,0,0,0.06)' }
 
   function entry(daily: Record<string, { qty: number; rev: number }>, date: string) {
@@ -63,49 +63,49 @@ export function DailySalesTable({ dailySales, preset }: Props) {
   }
 
   return (
-    <div className="bg-white rounded-lg border border-[#ede9fe] shadow-sm overflow-hidden">
-      <div className="px-4 py-3 border-b border-[#ede9fe] flex items-center justify-between">
-        <p className="text-[#9ca3af] text-xs uppercase tracking-wider">Daily Sales by Machine</p>
+    <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
+      <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+        <p className="text-muted text-xs uppercase tracking-wider">Daily Sales by Machine</p>
         {preset === 'all' && (
-          <span className="text-[#9ca3af] text-xs">Last 14 days shown · Totals reflect full period</span>
+          <span className="text-muted text-xs">Last 14 days shown · Totals reflect full period</span>
         )}
       </div>
       <div className="overflow-x-auto">
         <table className="text-xs border-collapse min-w-full">
           <thead>
             {/* Row 1: day names */}
-            <tr className="bg-[#f5f3ff]">
-              <th className={`sticky left-0 z-10 bg-[#f5f3ff] text-left text-[#9ca3af] font-medium ${stickyTd}`} style={stickyStyle}>
+            <tr className="bg-surface-hover">
+              <th className={`sticky left-0 z-10 bg-surface-hover text-left text-muted font-medium ${stickyTd}`} style={stickyStyle}>
                 Name of Machine
               </th>
-              <th colSpan={2} className="py-1.5 px-2 text-center text-[#7c3aed] font-semibold border-b border-[#ede9fe] border-l border-[#ede9fe]">
+              <th colSpan={2} className="py-1.5 px-2 text-center text-accent font-semibold border-b border-border border-l border-border">
                 TOTAL
               </th>
               {displayDates.map(d => (
-                <th key={d} colSpan={2} className="py-1.5 px-2 text-center text-[#6b7280] font-medium border-b border-[#ede9fe] border-l border-[#ede9fe]">
+                <th key={d} colSpan={2} className="py-1.5 px-2 text-center text-muted-strong font-medium border-b border-border border-l border-border">
                   {fmtDateHeader(d).day}
                 </th>
               ))}
             </tr>
             {/* Row 2: dates */}
-            <tr className="bg-[#f5f3ff]">
-              <th className="sticky left-0 z-10 bg-[#f5f3ff] border-b border-[#ede9fe]" style={stickyStyle} />
-              <th colSpan={2} className="border-b border-[#ede9fe] border-l border-[#ede9fe]" />
+            <tr className="bg-surface-hover">
+              <th className="sticky left-0 z-10 bg-surface-hover border-b border-border" style={stickyStyle} />
+              <th colSpan={2} className="border-b border-border border-l border-border" />
               {displayDates.map(d => (
-                <th key={d} colSpan={2} className="py-1 px-2 text-center text-[#6b7280] font-normal border-b border-[#ede9fe] border-l border-[#ede9fe]">
+                <th key={d} colSpan={2} className="py-1 px-2 text-center text-muted-strong font-normal border-b border-border border-l border-border">
                   {fmtDateHeader(d).date}
                 </th>
               ))}
             </tr>
             {/* Row 3: Qty / Rev sub-headers */}
-            <tr className="bg-[#faf5ff]">
-              <th className="sticky left-0 z-10 bg-[#faf5ff] border-b border-[#ede9fe]" style={stickyStyle} />
-              <th className="py-1 px-2 text-right text-[#7c3aed] font-semibold border-b border-[#ede9fe] border-l border-[#ede9fe] whitespace-nowrap">Qty</th>
-              <th className="py-1 px-2 text-right text-[#7c3aed] font-semibold border-b border-[#ede9fe] whitespace-nowrap">Rev</th>
+            <tr className="bg-surface-hover">
+              <th className="sticky left-0 z-10 bg-surface-hover border-b border-border" style={stickyStyle} />
+              <th className="py-1 px-2 text-right text-accent font-semibold border-b border-border border-l border-border whitespace-nowrap">Qty</th>
+              <th className="py-1 px-2 text-right text-accent font-semibold border-b border-border whitespace-nowrap">Rev</th>
               {displayDates.map(d => (
                 <Fragment key={d}>
-                  <th className="py-1 px-2 text-right text-[#9ca3af] font-medium border-b border-[#ede9fe] border-l border-[#ede9fe] whitespace-nowrap">Qty</th>
-                  <th className="py-1 px-2 text-right text-[#9ca3af] font-medium border-b border-[#ede9fe] whitespace-nowrap">Rev</th>
+                  <th className="py-1 px-2 text-right text-muted font-medium border-b border-border border-l border-border whitespace-nowrap">Qty</th>
+                  <th className="py-1 px-2 text-right text-muted font-medium border-b border-border whitespace-nowrap">Rev</th>
                 </Fragment>
               ))}
             </tr>
@@ -121,13 +121,13 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                     <td className={`sticky left-0 z-10 ${stickyTd} font-semibold border-l-4`} style={{ color, borderLeftColor: color, backgroundColor: locationBg(loc), boxShadow: '2px 0 4px rgba(0,0,0,0.06)' }}>
                       {loc}
                     </td>
-                    <td className={`${numCell} border-l border-[#ede9fe] font-semibold`} style={{ color }}>{lt.totalQty}</td>
+                    <td className={`${numCell} border-l border-border font-semibold`} style={{ color }}>{lt.totalQty}</td>
                     <td className={`${numCell} font-semibold`} style={{ color }}>${lt.totalRev.toFixed(2)}</td>
                     {displayDates.map(d => {
                       const e = entry(lt.daily, d)
                       return (
                         <Fragment key={d}>
-                          <td className={`${numCell} border-l border-[#ede9fe] font-medium`} style={{ color }}>
+                          <td className={`${numCell} border-l border-border font-medium`} style={{ color }}>
                             {e.qty > 0 ? e.qty : ''}
                           </td>
                           <td className={`${numCell} font-medium`} style={{ color }}>
@@ -139,18 +139,18 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                   </tr>
                   {/* Machine rows */}
                   {byLocation[loc].map(m => (
-                    <tr key={m.machine} className="hover:bg-[#faf5ff]">
-                      <td className={`sticky left-0 z-10 bg-white ${stickyTd} text-[#1e1b4b] pl-5`} style={stickyStyle}>{m.machine}</td>
-                      <td className={`${numCell} text-[#6b7280] border-l border-[#ede9fe]`}>{m.totalQty}</td>
-                      <td className={`${numCell} text-[#6b7280]`}>${m.totalRev.toFixed(2)}</td>
+                    <tr key={m.machine} className="hover:bg-surface-hover">
+                      <td className={`sticky left-0 z-10 bg-card ${stickyTd} text-foreground pl-5`} style={stickyStyle}>{m.machine}</td>
+                      <td className={`${numCell} text-muted-strong border-l border-border`}>{m.totalQty}</td>
+                      <td className={`${numCell} text-muted-strong`}>${m.totalRev.toFixed(2)}</td>
                       {displayDates.map(d => {
                         const e = entry(m.daily, d)
                         return (
                           <Fragment key={d}>
-                            <td className={`${numCell} text-[#6b7280] border-l border-[#ede9fe]`}>
+                            <td className={`${numCell} text-muted-strong border-l border-border`}>
                               {e.qty > 0 ? e.qty : ''}
                             </td>
-                            <td className={`${numCell} text-[#6b7280]`}>
+                            <td className={`${numCell} text-muted-strong`}>
                               {e.rev > 0 ? `$${e.rev.toFixed(2)}` : ''}
                             </td>
                           </Fragment>

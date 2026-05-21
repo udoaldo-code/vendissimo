@@ -36,15 +36,15 @@ export function DateFilter({ preset, dateFrom, dateTo, onChange }: Props) {
   const btn = (p: DatePreset) =>
     `px-3 py-1.5 text-xs font-medium rounded-md border transition-colors ${
       preset === p
-        ? 'bg-[#7c3aed] text-white border-[#7c3aed] shadow-sm'
-        : 'bg-white text-[#6b7280] border-[#ede9fe] hover:border-[#7c3aed] hover:text-[#7c3aed]'
+        ? 'bg-accent text-white border-accent shadow-sm'
+        : 'bg-card text-muted-strong border-border hover:border-accent hover:text-accent'
     }`
 
-  const dateInput = 'bg-white border border-[#ede9fe] rounded-md px-2 py-1 text-xs text-[#1e1b4b] focus:outline-none focus:border-[#7c3aed]'
+  const dateInput = 'bg-card border border-border rounded-md px-2 py-1 text-xs text-foreground focus:outline-none focus:border-accent'
 
   return (
-    <div className="flex flex-wrap items-center gap-2 bg-white border border-[#ede9fe] rounded-lg px-4 py-3 shadow-sm">
-      <span className="text-[#9ca3af] text-xs uppercase tracking-wider mr-1">Period</span>
+    <div className="flex flex-wrap items-center gap-2 bg-card border border-border rounded-lg px-4 py-3 shadow-sm">
+      <span className="text-muted text-xs uppercase tracking-wider mr-1">Period</span>
       {PRESETS.map(({ key, label }) => (
         <button key={key} className={btn(key)} onClick={() => selectPreset(key)}>
           {label}
@@ -58,7 +58,7 @@ export function DateFilter({ preset, dateFrom, dateTo, onChange }: Props) {
             onChange={e => onChange('custom', e.target.value, dateTo)}
             className={dateInput}
           />
-          <span className="text-[#9ca3af] text-xs">→</span>
+          <span className="text-muted text-xs">→</span>
           <input
             type="date"
             value={dateTo}
@@ -68,7 +68,7 @@ export function DateFilter({ preset, dateFrom, dateTo, onChange }: Props) {
         </div>
       )}
       {preset !== 'all' && (dateFrom || dateTo) && (
-        <span className="text-[#9ca3af] text-xs ml-1">
+        <span className="text-muted text-xs ml-1">
           {dateFrom}{dateFrom && dateTo && dateTo !== dateFrom ? ` → ${dateTo}` : ''}
         </span>
       )}
