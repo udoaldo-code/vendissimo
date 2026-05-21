@@ -12,29 +12,29 @@ export function KPISidebar({ kpis }: { kpis: KPIs }) {
         label="Total Revenue"
         value={fmt(kpis.totalRevenue)}
         sub="YTD 2026"
-        accentColor="#7c3aed"
+        accentColor="var(--color-accent)"
       />
       <KPICard
         label="Total Transactions"
         value={kpis.totalTransactions.toLocaleString()}
         sub={`${kpis.unitsSold.toLocaleString()} units sold`}
-        accentColor="#ec4899"
+        accentColor="var(--color-accent-pink)"
       />
       <KPICard
         label="Avg Daily Revenue"
         value={fmt(kpis.avgDailyRevenue)}
-        accentColor="#7c3aed"
+        accentColor="var(--color-accent)"
       />
       <KPICard
         label="Peak Day Revenue"
         value={fmt(kpis.peakDayRevenue)}
         sub={kpis.peakDayDate}
-        accentColor="#dc2626"
+        accentColor="var(--color-danger)"
       />
       <KPICard
         label="Machines / Locations"
         value={`${kpis.activeMachines} / ${kpis.activeLocations}`}
-        accentColor="#ec4899"
+        accentColor="var(--color-accent-pink)"
       />
     </div>
   )

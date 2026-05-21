@@ -21,10 +21,10 @@ export function Sidebar() {
   }, [collapsed])
 
   const nav = (
-    <aside className={`${compact ? 'w-[4.5rem]' : 'w-56'} h-full bg-white border-r border-[#ede9fe] flex flex-col transition-[width] duration-200`}>
-      <div className="p-4 border-b border-[#ede9fe] flex items-center justify-between">
+    <aside className={`${compact ? 'w-[4.5rem]' : 'w-56'} h-full bg-card border-r border-border flex flex-col transition-[width] duration-200`}>
+      <div className="p-4 border-b border-border flex items-center justify-between">
         {compact ? (
-          <div className="hidden md:flex w-8 h-8 rounded-md border border-[#ede9fe] items-center justify-center text-[#7c3aed] font-semibold text-sm">
+          <div className="hidden md:flex w-8 h-8 rounded-md border border-border items-center justify-center text-accent font-semibold text-sm">
             V
           </div>
         ) : (
@@ -32,20 +32,20 @@ export function Sidebar() {
         )}
 
         <button
-          className="hidden md:inline-flex w-7 h-7 rounded-md border border-[#ede9fe] text-[#9ca3af] hover:text-[#7c3aed] items-center justify-center text-sm"
+          className="hidden md:inline-flex w-7 h-7 rounded-md border border-border text-muted hover:text-accent items-center justify-center text-sm"
           onClick={() => setCollapsed(v => !v)}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          {collapsed ? '›' : '‹'}
+          {collapsed ? '>' : '<'}
         </button>
 
         <button
-          className="md:hidden text-[#9ca3af] hover:text-[#7c3aed] text-xl leading-none"
+          className="md:hidden text-muted hover:text-accent text-xl leading-none"
           onClick={() => setOpen(false)}
           aria-label="Close menu"
         >
-          ✕
+          x
         </button>
       </div>
 
@@ -60,8 +60,8 @@ export function Sidebar() {
               title={compact ? link.label : undefined}
               className={`flex items-center ${compact ? 'justify-center px-2' : 'gap-2.5 px-3'} py-2 rounded-md text-sm transition-colors ${
                 active
-                  ? `bg-[#f5f3ff] text-[#7c3aed] border-l-4 border-[#7c3aed] ${compact ? '' : 'pl-2'}`
-                  : 'text-[#6b7280] hover:text-[#1e1b4b] hover:bg-[#faf5ff]'
+                  ? `bg-surface-hover text-accent border-l-4 border-accent ${compact ? '' : 'pl-2'}`
+                  : 'text-muted-strong hover:text-foreground hover:bg-background'
               }`}
             >
               <span className="text-base">{link.icon}</span>
@@ -71,9 +71,9 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="p-3 border-t border-[#ede9fe]">
-        <p className={`text-[#9ca3af] text-xs ${compact ? 'text-center' : ''}`}>
-          {compact ? 'Live' : 'Data: Google Sheets · Live'}
+      <div className="p-3 border-t border-border">
+        <p className={`text-muted text-xs ${compact ? 'text-center' : ''}`}>
+          {compact ? 'Live' : 'Data: Google Sheets - Live'}
         </p>
       </div>
     </aside>
@@ -87,9 +87,9 @@ export function Sidebar() {
       </div>
 
       {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 inset-x-0 z-40 h-14 bg-white border-b border-[#ede9fe] shadow-sm flex items-center px-4 gap-3">
+      <div className="md:hidden fixed top-0 inset-x-0 z-40 h-14 bg-card border-b border-border shadow-sm flex items-center px-4 gap-3">
         <button
-          className="p-2 rounded-md text-[#7c3aed]"
+          className="p-2 rounded-md text-accent"
           onClick={() => setOpen(true)}
           aria-label="Open menu"
         >

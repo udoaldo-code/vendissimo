@@ -18,9 +18,9 @@ export function FilterBar({ filters, onChange, machines, locations, products }: 
   }
 
   const selectClass =
-    'bg-white border border-[#ede9fe] rounded-md px-2 py-1.5 text-sm text-[#1e1b4b] focus:outline-none focus:border-[#7c3aed] min-w-[130px]'
+    'bg-card border border-border rounded-md px-2 py-1.5 text-sm text-foreground focus:outline-none focus:border-accent min-w-[130px]'
   const inputClass =
-    'bg-white border border-[#ede9fe] rounded-md px-2 py-1.5 text-sm text-[#1e1b4b] placeholder-[#9ca3af] focus:outline-none focus:border-[#7c3aed]'
+    'bg-card border border-border rounded-md px-2 py-1.5 text-sm text-foreground placeholder-muted focus:outline-none focus:border-accent'
 
   return (
     <div className="flex flex-wrap gap-2 items-center">
@@ -60,7 +60,7 @@ export function FilterBar({ filters, onChange, machines, locations, products }: 
       {Object.values(filters).some(Boolean) && (
         <button
           onClick={() => onChange(EMPTY_FILTERS)}
-          className="text-xs text-[#6b7280] hover:text-[#7c3aed] px-2 py-1.5 border border-[#ede9fe] rounded-md hover:border-[#ddd6fe] transition-colors"
+          className="text-xs text-muted-strong hover:text-accent px-2 py-1.5 border border-border rounded-md hover:border-border-strong transition-colors"
         >
           Clear
         </button>

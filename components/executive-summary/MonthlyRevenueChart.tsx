@@ -12,30 +12,30 @@ export function MonthlyRevenueChart({ data }: { data: MonthlyRow[] }) {
   }))
 
   return (
-    <div className="bg-white rounded-lg p-4 border border-[#ede9fe] shadow-sm">
-      <p className="text-[#9ca3af] text-xs uppercase tracking-wider mb-4">Monthly Revenue</p>
+    <div className="bg-card rounded-lg p-4 border border-border shadow-sm">
+      <p className="text-muted text-xs uppercase tracking-wider mb-4">Monthly Revenue</p>
       <ResponsiveContainer width="100%" height={200}>
         <BarChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#ede9fe" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
           <XAxis
             dataKey="month"
-            tick={{ fill: '#6b7280', fontSize: 11 }}
+            tick={{ fill: 'var(--color-muted-strong)', fontSize: 11 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
-            tick={{ fill: '#6b7280', fontSize: 11 }}
+            tick={{ fill: 'var(--color-muted-strong)', fontSize: 11 }}
             axisLine={false}
             tickLine={false}
             tickFormatter={v => `$${v}`}
           />
           <Tooltip
-            contentStyle={{ background: '#ffffff', border: '1px solid #ede9fe', borderRadius: '6px' }}
-            labelStyle={{ color: '#1e1b4b', fontWeight: 600 }}
+            contentStyle={{ background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '6px' }}
+            labelStyle={{ color: 'var(--color-foreground)', fontWeight: 600 }}
             formatter={(v) => [`$${Number(v).toFixed(2)}`, 'Revenue']}
-            cursor={{ fill: '#f5f3ff' }}
+            cursor={{ fill: 'var(--color-surface-hover)' }}
           />
-          <Bar dataKey="revenue" fill="#7c3aed" radius={[4, 4, 0, 0]} maxBarSize={40} />
+          <Bar dataKey="revenue" fill="var(--color-accent)" radius={[4, 4, 0, 0]} maxBarSize={40} />
         </BarChart>
       </ResponsiveContainer>
     </div>

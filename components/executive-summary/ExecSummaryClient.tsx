@@ -39,10 +39,10 @@ export function ExecSummaryClient({ transactions, categoryMap }: Props) {
   )
 
   const mobileKpis = [
-    { label: 'Total Revenue', value: `$${data.kpis.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, accent: '#7c3aed' },
-    { label: 'Transactions', value: data.kpis.totalTransactions.toLocaleString(), accent: '#ec4899' },
-    { label: 'Avg Daily', value: `$${data.kpis.avgDailyRevenue.toFixed(2)}`, accent: '#7c3aed' },
-    { label: 'Peak Day', value: `$${data.kpis.peakDayRevenue.toFixed(2)}`, accent: '#dc2626' },
+    { label: 'Total Revenue', value: `$${data.kpis.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, accent: 'var(--color-accent)' },
+    { label: 'Transactions', value: data.kpis.totalTransactions.toLocaleString(), accent: 'var(--color-accent-pink)' },
+    { label: 'Avg Daily', value: `$${data.kpis.avgDailyRevenue.toFixed(2)}`, accent: 'var(--color-accent)' },
+    { label: 'Peak Day', value: `$${data.kpis.peakDayRevenue.toFixed(2)}`, accent: 'var(--color-danger)' },
   ]
 
   const charts = (
@@ -63,7 +63,7 @@ export function ExecSummaryClient({ transactions, categoryMap }: Props) {
       <DateFilter preset={preset} dateFrom={dateFrom} dateTo={dateTo} onChange={handleChange} />
 
       {filtered.length === 0 && (
-        <div className="text-center py-16 text-[#9ca3af] text-sm">
+        <div className="text-center py-16 text-muted text-sm">
           No transactions found for selected period.
         </div>
       )}
@@ -73,8 +73,8 @@ export function ExecSummaryClient({ transactions, categoryMap }: Props) {
           {/* Mobile: 2-column KPI grid */}
           <div className="grid grid-cols-2 gap-3 md:hidden">
             {mobileKpis.map(k => (
-              <div key={k.label} className="bg-white rounded-lg p-3 border border-[#ede9fe] border-l-4 shadow-sm" style={{ borderLeftColor: k.accent }}>
-                <p className="text-[#9ca3af] text-xs uppercase tracking-wider mb-0.5">{k.label}</p>
+              <div key={k.label} className="bg-card rounded-lg p-3 border border-border border-l-4 shadow-sm" style={{ borderLeftColor: k.accent }}>
+                <p className="text-muted text-xs uppercase tracking-wider mb-0.5">{k.label}</p>
                 <p className="font-bold text-base" style={{ color: k.accent }}>{k.value}</p>
               </div>
             ))}

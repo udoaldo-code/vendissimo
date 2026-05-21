@@ -20,7 +20,7 @@ export function ExportCSVButton({ transactions }: { transactions: Transaction[] 
   return (
     <button
       onClick={handleExport}
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-[#7c3aed]/10 border border-[#7c3aed]/30 text-[#7c3aed] hover:bg-[#7c3aed]/20 transition-colors whitespace-nowrap"
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-accent/10 border border-accent/30 text-accent hover:bg-accent/20 transition-colors whitespace-nowrap"
     >
       ↓ Export CSV ({transactions.length.toLocaleString()} rows)
     </button>
