@@ -1,9 +1,19 @@
 @import "tailwindcss";
 
+:root {
+  --sidebar-width: 14rem;
+}
+
 body {
   background-color: #faf5ff;
   color: #1e1b4b;
   font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+@media (min-width: 768px) {
+  #page-content {
+    margin-left: var(--sidebar-width);
+  }
 }
 
 * {
