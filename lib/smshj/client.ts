@@ -47,6 +47,10 @@ export class SmshjClient {
     extraForm: Record<string, string>,
     expectLoc: string,
   ): Promise<void> {
+    // Start clean: a re-login must not carry an expired JSESSIONID into the
+    // POST, or the server rejects it ("登录信息失效"). The login-page GET
+    // below establishes the fresh session cookie.
+    session.jar = new CookieJar()
     const pre = await this.req(session, 'GET', `${this.baseURL()}/${loginPage}`)
     await pre.text()
 
