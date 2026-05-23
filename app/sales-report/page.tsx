@@ -5,7 +5,7 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 import { RefreshButton } from '@/components/RefreshButton'
 import { SalesReportClient } from '@/components/sales-report/SalesReportClient'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300 // 5-min ISR cache — re-render in background after window
 
 export default async function SalesReportPage() {
   const transactions = await fetchTransactions()

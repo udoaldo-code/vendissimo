@@ -4,7 +4,7 @@ import { RefreshButton } from '@/components/RefreshButton'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { DatabaseClient } from '@/components/database/DatabaseClient'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300 // 5-min ISR cache — re-render in background after window
 
 export default async function DatabasePage() {
   const transactions = await fetchTransactions()

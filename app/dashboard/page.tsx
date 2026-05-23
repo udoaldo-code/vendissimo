@@ -5,7 +5,7 @@ import { RefreshButton } from '@/components/RefreshButton'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { ExecSummaryClient } from '@/components/executive-summary/ExecSummaryClient'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300 // 5-min ISR cache — re-render in background after window
 
 export default async function DashboardPage() {
   const transactions = await fetchTransactions()
