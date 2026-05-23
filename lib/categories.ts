@@ -1,0 +1,23 @@
+/** product_name → category. Edit this map when new products are added. */
+export const PRODUCT_CATEGORIES: Record<string, string> = {
+  'Hi-Tech-Water': 'Water',
+  'Hi-Tech': 'Water',
+  'Hi - Tech 1500ml': 'Water',
+  'Water': 'Water',
+  'OLATTE': 'Dairy',
+  'Olatte apple': 'Dairy',
+  'Olatte Original': 'Dairy',
+  'Indomilk': 'Dairy',
+  'Indomilk chocolate': 'Dairy',
+  'Pediasure': 'Dairy',
+  'Ensure vanilla': 'Dairy',
+  'Pocarisweat-can': 'Sports Drink',
+  'BACCHUS': 'Energy Drink',
+  'Shin Kim Chi': 'Food',
+  'Shin Ramyum': 'Food',
+  'Coca-Cola': 'Soda',
+  'Fanta-grape': 'Soda',
+  'Fanta-orange': 'Soda',
+  'Freshy-Soybean': 'Soy Drink',
+  'Idol': 'Other',
+}
