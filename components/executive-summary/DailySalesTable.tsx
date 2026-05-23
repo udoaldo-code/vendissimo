@@ -131,10 +131,10 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                       return (
                         <Fragment key={d}>
                           <td className={`${numCell} border-l border-border font-medium`} style={{ color }}>
-                            {e.qty > 0 ? e.qty : ''}
+                            {e.qty}
                           </td>
                           <td className={`${numCell} font-medium`} style={{ color }}>
-                            {e.rev > 0 ? formatMoney(e.rev, currency) : ''}
+                            {formatMoney(e.rev, currency)}
                           </td>
                         </Fragment>
                       )
@@ -151,10 +151,10 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                         return (
                           <Fragment key={d}>
                             <td className={`${numCell} text-muted-strong border-l border-border`}>
-                              {e.qty > 0 ? e.qty : ''}
+                              {e.qty}
                             </td>
                             <td className={`${numCell} text-muted-strong`}>
-                              {e.rev > 0 ? formatMoney(e.rev, currency) : ''}
+                              {formatMoney(e.rev, currency)}
                             </td>
                           </Fragment>
                         )
@@ -180,10 +180,10 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                 return (
                   <Fragment key={d}>
                     <td className="py-2 px-2 text-right text-white font-medium text-xs tabular-nums whitespace-nowrap border-l border-white/20">
-                      {e.qty > 0 ? e.qty : ''}
+                      {e.qty}
                     </td>
                     <td className="py-2 px-2 text-right text-white font-medium text-xs tabular-nums whitespace-nowrap">
-                      {e.rev > 0 ? formatMoney(e.rev, currency) : ''}
+                      {formatMoney(e.rev, currency)}
                     </td>
                   </Fragment>
                 )
