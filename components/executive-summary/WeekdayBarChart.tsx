@@ -1,6 +1,8 @@
 'use client'
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import { useCurrency } from '@/components/currency-context'
+import { formatMoney } from '@/lib/transactions'
 import type { DailyRevenue } from '@/lib/types'
 import type { DatePreset } from './DateFilter'
 import { parseTransactionDate } from '@/lib/filter-utils'
@@ -17,6 +19,7 @@ type Props = {
 }
 
 export function WeekdayBarChart({ daily, preset }: Props) {
+  const currency = useCurrency()
   // For All Time, cap to last 30 days
   const source = preset === 'all' ? daily.slice(-30) : daily
   const chartData = source.map(d => ({ label: fmtDateLabel(d.date), revenue: d.revenue }))
@@ -38,11 +41,11 @@ export function WeekdayBarChart({ daily, preset }: Props) {
             textAnchor={manyBars ? 'end' : 'middle'}
             interval={manyBars ? 'preserveStartEnd' : 0}
           />
-          <YAxis tick={{ fill: 'var(--color-muted-strong)', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}`} />
+          <YAxis tick={{ fill: 'var(--color-muted-strong)', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={v => formatMoney(Number(v), currency)} />
           <Tooltip
             contentStyle={{ background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '6px' }}
             labelStyle={{ color: 'var(--color-foreground)' }}
-            formatter={(v) => [`$${Number(v).toFixed(2)}`, 'Revenue']}
+            formatter={(v) => [formatMoney(Number(v), currency), 'Revenue']}
             cursor={{ fill: 'var(--color-surface-hover)' }}
           />
           <Bar dataKey="revenue" radius={[3, 3, 0, 0]} maxBarSize={30}>

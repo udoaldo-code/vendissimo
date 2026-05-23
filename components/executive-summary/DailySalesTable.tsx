@@ -1,6 +1,8 @@
 'use client'
 
 import { Fragment } from 'react'
+import { useCurrency } from '@/components/currency-context'
+import { formatMoney } from '@/lib/transactions'
 import type { DailySalesData } from '@/lib/types'
 import type { DatePreset } from './DateFilter'
 import { parseTransactionDate } from '@/lib/filter-utils'
@@ -38,6 +40,7 @@ type Props = {
 }
 
 export function DailySalesTable({ dailySales, preset }: Props) {
+  const currency = useCurrency()
   const { dates, machines, locationTotals, grandTotal } = dailySales
 
   const displayDates = (preset === 'all' ? dates.slice(-14) : dates).slice().reverse()
@@ -122,7 +125,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                       {loc}
                     </td>
                     <td className={`${numCell} border-l border-border font-semibold`} style={{ color }}>{lt.totalQty}</td>
-                    <td className={`${numCell} font-semibold`} style={{ color }}>${lt.totalRev.toFixed(2)}</td>
+                    <td className={`${numCell} font-semibold`} style={{ color }}>{formatMoney(lt.totalRev, currency)}</td>
                     {displayDates.map(d => {
                       const e = entry(lt.daily, d)
                       return (
@@ -131,7 +134,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                             {e.qty > 0 ? e.qty : ''}
                           </td>
                           <td className={`${numCell} font-medium`} style={{ color }}>
-                            {e.rev > 0 ? `$${e.rev.toFixed(2)}` : ''}
+                            {e.rev > 0 ? formatMoney(e.rev, currency) : ''}
                           </td>
                         </Fragment>
                       )
@@ -142,7 +145,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                     <tr key={m.machine} className="hover:bg-surface-hover">
                       <td className={`sticky left-0 z-10 bg-card ${stickyTd} text-foreground pl-5`} style={stickyStyle}>{m.machine}</td>
                       <td className={`${numCell} text-muted-strong border-l border-border`}>{m.totalQty}</td>
-                      <td className={`${numCell} text-muted-strong`}>${m.totalRev.toFixed(2)}</td>
+                      <td className={`${numCell} text-muted-strong`}>{formatMoney(m.totalRev, currency)}</td>
                       {displayDates.map(d => {
                         const e = entry(m.daily, d)
                         return (
@@ -151,7 +154,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                               {e.qty > 0 ? e.qty : ''}
                             </td>
                             <td className={`${numCell} text-muted-strong`}>
-                              {e.rev > 0 ? `$${e.rev.toFixed(2)}` : ''}
+                              {e.rev > 0 ? formatMoney(e.rev, currency) : ''}
                             </td>
                           </Fragment>
                         )
@@ -170,7 +173,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                 {grandTotal.totalQty}
               </td>
               <td className="py-2 px-2 text-right text-[#a78bfa] font-bold text-xs tabular-nums whitespace-nowrap">
-                ${grandTotal.totalRev.toFixed(2)}
+                {formatMoney(grandTotal.totalRev, currency)}
               </td>
               {displayDates.map(d => {
                 const e = entry(grandTotal.daily, d)
@@ -180,7 +183,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                       {e.qty > 0 ? e.qty : ''}
                     </td>
                     <td className="py-2 px-2 text-right text-white font-medium text-xs tabular-nums whitespace-nowrap">
-                      {e.rev > 0 ? `$${e.rev.toFixed(2)}` : ''}
+                      {e.rev > 0 ? formatMoney(e.rev, currency) : ''}
                     </td>
                   </Fragment>
                 )

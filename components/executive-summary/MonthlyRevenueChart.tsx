@@ -3,9 +3,12 @@
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
+import { useCurrency } from '@/components/currency-context'
+import { formatMoney } from '@/lib/transactions'
 import type { MonthlyRow } from '@/lib/types'
 
 export function MonthlyRevenueChart({ data }: { data: MonthlyRow[] }) {
+  const currency = useCurrency()
   const chartData = data.map(d => ({
     month: d.month.slice(0, 3),
     revenue: d.revenue,
@@ -27,12 +30,12 @@ export function MonthlyRevenueChart({ data }: { data: MonthlyRow[] }) {
             tick={{ fill: 'var(--color-muted-strong)', fontSize: 11 }}
             axisLine={false}
             tickLine={false}
-            tickFormatter={v => `$${v}`}
+            tickFormatter={v => formatMoney(Number(v), currency)}
           />
           <Tooltip
             contentStyle={{ background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '6px' }}
             labelStyle={{ color: 'var(--color-foreground)', fontWeight: 600 }}
-            formatter={(v) => [`$${Number(v).toFixed(2)}`, 'Revenue']}
+            formatter={(v) => [formatMoney(Number(v), currency), 'Revenue']}
             cursor={{ fill: 'var(--color-surface-hover)' }}
           />
           <Bar dataKey="revenue" fill="var(--color-accent)" radius={[4, 4, 0, 0]} maxBarSize={40} />

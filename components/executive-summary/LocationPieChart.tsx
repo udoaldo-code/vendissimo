@@ -1,11 +1,14 @@
 'use client'
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { useCurrency } from '@/components/currency-context'
+import { formatMoney } from '@/lib/transactions'
 import type { MachineRow } from '@/lib/types'
 
 const COLORS = ['#7c3aed', '#ec4899', '#8b5cf6', '#f472b6']
 
 export function LocationPieChart({ machines }: { machines: MachineRow[] }) {
+  const currency = useCurrency()
   const byLocation = machines.reduce<Record<string, number>>((acc, m) => {
     acc[m.location] = (acc[m.location] ?? 0) + m.revenue
     return acc
@@ -34,7 +37,7 @@ export function LocationPieChart({ machines }: { machines: MachineRow[] }) {
           <Tooltip
             contentStyle={{ background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '6px' }}
             labelStyle={{ color: 'var(--color-foreground)' }}
-            formatter={(v) => [`$${Number(v).toFixed(2)}`, 'Revenue']}
+            formatter={(v) => [formatMoney(Number(v), currency), 'Revenue']}
           />
           <Legend
             formatter={value => <span style={{ color: 'var(--color-muted-strong)', fontSize: 11 }}>{value}</span>}

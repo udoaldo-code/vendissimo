@@ -1,8 +1,13 @@
+'use client'
+
+import { useCurrency } from '@/components/currency-context'
+import { formatMoney } from '@/lib/transactions'
 import type { Transaction } from '@/lib/types'
 
 type Props = { transactions: Transaction[]; total: number }
 
 export function SummaryBar({ transactions, total }: Props) {
+  const currency = useCurrency()
   const revenue = transactions.reduce((sum, t) => sum + t.unitPrice * t.qty, 0)
   const units = transactions.reduce((sum, t) => sum + t.qty, 0)
 
@@ -16,7 +21,7 @@ export function SummaryBar({ transactions, total }: Props) {
       <div className="h-4 w-px bg-border hidden sm:block" />
       <div>
         <span className="text-muted mr-2">Revenue</span>
-        <span className="text-accent-pink font-bold">${revenue.toFixed(2)}</span>
+        <span className="text-accent-pink font-bold">{formatMoney(revenue, currency)}</span>
       </div>
       <div className="h-4 w-px bg-border hidden sm:block" />
       <div>

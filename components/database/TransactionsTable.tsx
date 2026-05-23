@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { useCurrency } from '@/components/currency-context'
+import { formatMoney } from '@/lib/transactions'
 import type { Transaction } from '@/lib/types'
 import { parseTransactionDate } from '@/lib/filter-utils'
 
@@ -18,6 +20,7 @@ function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; s
 }
 
 export function TransactionsTable({ transactions }: { transactions: Transaction[] }) {
+  const currency = useCurrency()
   const [sortKey, setSortKey] = useState<SortKey>('date')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [page, setPage] = useState(0)
@@ -79,9 +82,9 @@ export function TransactionsTable({ transactions }: { transactions: Transaction[
                 <td className={tdClass}>{t.machine}</td>
                 <td className={tdClass}>{t.location}</td>
                 <td className={`${tdClass} text-foreground`}>{t.product}</td>
-                <td className={`${tdClass} text-right`}>${t.unitPrice.toFixed(2)}</td>
+                <td className={`${tdClass} text-right`}>{formatMoney(t.unitPrice, currency)}</td>
                 <td className={`${tdClass} text-right`}>{t.qty}</td>
-                <td className={`${tdClass} text-right text-accent font-medium`}>${(t.unitPrice * t.qty).toFixed(2)}</td>
+                <td className={`${tdClass} text-right text-accent font-medium`}>{formatMoney(t.unitPrice * t.qty, currency)}</td>
               </tr>
             ))}
           </tbody>

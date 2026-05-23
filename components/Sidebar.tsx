@@ -6,9 +6,12 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 const NAV_LINKS = [
-  { href: '/executive-summary', label: 'Executive Summary', icon: '📊' },
-  { href: '/database', label: 'Database', icon: '🗃️' },
+  { href: '/dashboard', label: 'Dashboard', icon: '📊' },
+  { href: '/machine-monitoring', label: 'Machine Monitoring', icon: '📡' },
+  { href: '/sales-report', label: 'Sales Report', icon: '📄' },
 ]
+
+const DATABASE_LINK = { href: '/database', label: 'Database', icon: '🗃️' }
 
 export function Sidebar() {
   const pathname = usePathname()
@@ -32,12 +35,16 @@ export function Sidebar() {
         )}
 
         <button
-          className="hidden md:inline-flex w-7 h-7 rounded-md border border-border text-muted hover:text-accent items-center justify-center text-sm"
+          className="hidden md:inline-flex w-8 h-8 rounded-md border border-border text-muted hover:text-accent items-center justify-center"
           onClick={() => setCollapsed(v => !v)}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          {collapsed ? '>' : '<'}
+          <span className={`flex flex-col items-center justify-center gap-1 transition-transform duration-300 ${collapsed ? 'rotate-0 scale-100' : 'rotate-180 scale-95'}`}>
+            <span className={`block h-0.5 bg-current rounded-full transition-all duration-300 ${collapsed ? 'w-4' : 'w-3.5'}`} />
+            <span className={`block h-0.5 bg-current rounded-full transition-all duration-300 ${collapsed ? 'w-4' : 'w-2.5'}`} />
+            <span className={`block h-0.5 bg-current rounded-full transition-all duration-300 ${collapsed ? 'w-4' : 'w-3.5'}`} />
+          </span>
         </button>
 
         <button
@@ -49,7 +56,7 @@ export function Sidebar() {
         </button>
       </div>
 
-      <nav className="flex-1 p-3 space-y-1">
+      <nav className="flex-1 p-3 flex flex-col gap-1">
         {NAV_LINKS.map(link => {
           const active = pathname === link.href
           return (
@@ -69,6 +76,27 @@ export function Sidebar() {
             </Link>
           )
         })}
+
+        {(() => {
+          const link = DATABASE_LINK
+          const active = pathname === link.href
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setOpen(false)}
+              title={compact ? link.label : undefined}
+              className={`mt-auto flex items-center ${compact ? 'justify-center px-2' : 'gap-2.5 px-3'} py-2 rounded-md text-sm transition-colors ${
+                active
+                  ? `bg-surface-hover text-accent border-l-4 border-accent ${compact ? '' : 'pl-2'}`
+                  : 'text-muted-strong hover:text-foreground hover:bg-background'
+              }`}
+            >
+              <span className="text-base">{link.icon}</span>
+              {!compact && link.label}
+            </Link>
+          )
+        })()}
       </nav>
 
       <div className="p-3 border-t border-border">

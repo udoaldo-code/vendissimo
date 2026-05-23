@@ -1,3 +1,7 @@
+'use client'
+
+import { useCurrency } from '@/components/currency-context'
+import { formatMoney } from '@/lib/transactions'
 import type { ProductRow } from '@/lib/types'
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -11,13 +15,15 @@ const CATEGORY_COLORS: Record<string, string> = {
 }
 
 export function TopProductsTable({ products }: { products: ProductRow[] }) {
-  const maxRevenue = products[0]?.revenue || 1
+  const currency = useCurrency()
+  const topProducts = products.slice(0, 5)
+  const maxRevenue = topProducts[0]?.revenue || 1
 
   return (
     <div className="bg-card rounded-lg p-4 border border-border shadow-sm">
       <p className="text-muted text-xs uppercase tracking-wider mb-4">Product Performance</p>
       <div className="space-y-3">
-        {products.map((p, i) => (
+        {topProducts.map((p, i) => (
           <div key={p.product}>
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2 min-w-0">
@@ -33,7 +39,7 @@ export function TopProductsTable({ products }: { products: ProductRow[] }) {
               <div className="flex items-center gap-4 text-xs text-muted-strong shrink-0">
                 <span className="hidden sm:inline">{p.unitsSold.toLocaleString()} units</span>
                 <span className="text-foreground font-medium w-20 text-right">
-                  ${p.revenue.toFixed(2)}
+                  {formatMoney(p.revenue, currency)}
                 </span>
               </div>
             </div>
