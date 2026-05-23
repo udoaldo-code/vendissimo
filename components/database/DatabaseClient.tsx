@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import type { Transaction, FilterState } from '@/lib/types'
 import { filterTransactions } from '@/lib/filter-utils'
+import { CurrencyContext, useCurrencyState } from '@/components/currency-context'
 import { SummaryBar } from './SummaryBar'
 import { FilterBar } from './FilterBar'
 import { TransactionsTable } from './TransactionsTable'
@@ -13,9 +14,15 @@ function unique(arr: string[]) {
 }
 
 export function DatabaseClient({ transactions }: { transactions: Transaction[] }) {
+  const currency = useCurrencyState()
   const [filters, setFilters] = useState<FilterState>({
-    search: '', machine: '', location: '', product: '', dateFrom: '', dateTo: '',
+    search: '', machine: '', location: '', product: '', dateFrom: '', dateTo: '', currency: 'KHR',
   })
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFilters(f => ({ ...f, currency }))
+  }, [currency])
 
   const machines = useMemo(() => unique(transactions.map(t => t.machine)), [transactions])
   const locations = useMemo(() => unique(transactions.map(t => t.location)), [transactions])
@@ -27,6 +34,7 @@ export function DatabaseClient({ transactions }: { transactions: Transaction[] }
   )
 
   return (
+    <CurrencyContext.Provider value={currency}>
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <SummaryBar transactions={filtered} total={transactions.length} />
@@ -41,5 +49,6 @@ export function DatabaseClient({ transactions }: { transactions: Transaction[] }
       />
       <TransactionsTable transactions={filtered} />
     </div>
+    </CurrencyContext.Provider>
   )
 }

@@ -2,7 +2,8 @@
 
 import type { FilterState } from '@/lib/types'
 
-const EMPTY_FILTERS: FilterState = { search: '', machine: '', location: '', product: '', dateFrom: '', dateTo: '' }
+// Clearing the filter bar keeps the active currency — only the field values reset.
+const CLEAR_FIELDS = { search: '', machine: '', location: '', product: '', dateFrom: '', dateTo: '' } as const
 
 type Props = {
   filters: FilterState
@@ -59,7 +60,7 @@ export function FilterBar({ filters, onChange, machines, locations, products }: 
       />
       {Object.values(filters).some(Boolean) && (
         <button
-          onClick={() => onChange(EMPTY_FILTERS)}
+          onClick={() => onChange({ ...filters, ...CLEAR_FIELDS })}
           className="text-xs text-muted-strong hover:text-accent px-2 py-1.5 border border-border rounded-md hover:border-border-strong transition-colors"
         >
           Clear
