@@ -3,7 +3,7 @@ import type { Transaction } from './types'
 import { rowToTransaction, type CHRow } from './transactions'
 import { DEVICE_LOCATIONS } from './locations'
 
-const CACHE_TTL_MS = 30 * 60_000 // 30 minutes
+const CACHE_TTL_MS = 5 * 60_000 // 5 minutes — short enough that new sales appear quickly on every page
 
 let cache: { at: number; data: Transaction[] } | null = null
 
