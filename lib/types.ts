@@ -1,3 +1,5 @@
+export type Currency = 'USD' | 'KHR'
+
 export type KPIs = {
   totalRevenue: number
   totalTransactions: number
@@ -81,6 +83,7 @@ export type Transaction = {
   qty: number
   time: string
   date: string
+  currency: Currency
 }
 
 export type FilterState = {
@@ -90,4 +93,5 @@ export type FilterState = {
   product: string
   dateFrom: string
   dateTo: string
+  currency: Currency
 }
