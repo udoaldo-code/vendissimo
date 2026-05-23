@@ -2,7 +2,6 @@ import { fetchTransactions } from '@/lib/clickhouse'
 import { PRODUCT_CATEGORIES } from '@/lib/categories'
 import { RefreshButton } from '@/components/RefreshButton'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { CurrencyToggle } from '@/components/CurrencyToggle'
 import { ExecSummaryClient } from '@/components/executive-summary/ExecSummaryClient'
 
 export const dynamic = 'force-dynamic'
@@ -19,7 +18,6 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <CurrencyToggle />
           <ThemeToggle />
           <RefreshButton />
         </div>

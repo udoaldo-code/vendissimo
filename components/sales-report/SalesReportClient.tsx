@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import type { Transaction } from '@/lib/types'
+import type { Currency, Transaction } from '@/lib/types'
 import { filterByDateRange, aggregateTransactions } from '@/lib/aggregate'
-import { CurrencyContext, useCurrencyState } from '@/components/currency-context'
 import { DateFilter, type DatePreset } from '@/components/executive-summary/DateFilter'
 import { DailySalesTable } from '@/components/executive-summary/DailySalesTable'
 
@@ -13,7 +12,7 @@ type Props = {
 }
 
 export function SalesReportClient({ transactions, categoryMap }: Props) {
-  const currency = useCurrencyState()
+  const currency: Currency = 'USD'
   const [preset, setPreset] = useState<DatePreset>('all')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
@@ -37,7 +36,6 @@ export function SalesReportClient({ transactions, categoryMap }: Props) {
   const hasData = dailySales.dates.length > 0 && dailySales.machines.length > 0
 
   return (
-    <CurrencyContext.Provider value={currency}>
     <div className="flex flex-col gap-4">
       <DateFilter preset={preset} dateFrom={dateFrom} dateTo={dateTo} onChange={handleChange} />
 
@@ -50,6 +48,5 @@ export function SalesReportClient({ transactions, categoryMap }: Props) {
         </div>
       )}
     </div>
-    </CurrencyContext.Provider>
   )
 }

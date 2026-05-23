@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 import { useState, useMemo } from 'react'
 import type { Transaction } from '@/lib/types'
-import { CurrencyContext, useCurrencyState } from '@/components/currency-context'
+import type { Currency } from '@/lib/types'
 import { formatMoney } from '@/lib/transactions'
 import { filterByDateRange, aggregateTransactions } from '@/lib/aggregate'
 import { DateFilter, type DatePreset } from './DateFilter'
@@ -45,7 +45,7 @@ type Props = {
 }
 
 export function ExecSummaryClient({ transactions, categoryMap }: Props) {
-  const currency = useCurrencyState()
+  const currency: Currency = 'USD'
   const [preset, setPreset] = useState<DatePreset>('all')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
@@ -86,7 +86,6 @@ export function ExecSummaryClient({ transactions, categoryMap }: Props) {
   )
 
   return (
-    <CurrencyContext.Provider value={currency}>
     <div className="flex flex-col gap-4">
       <DateFilter preset={preset} dateFrom={dateFrom} dateTo={dateTo} onChange={handleChange} />
 
@@ -125,6 +124,5 @@ export function ExecSummaryClient({ transactions, categoryMap }: Props) {
         </>
       )}
     </div>
-    </CurrencyContext.Provider>
   )
 }

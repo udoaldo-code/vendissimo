@@ -1,7 +1,6 @@
 import { fetchTransactions } from '@/lib/clickhouse'
 import { PRODUCT_CATEGORIES } from '@/lib/categories'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { CurrencyToggle } from '@/components/CurrencyToggle'
 import { RefreshButton } from '@/components/RefreshButton'
 import { SalesReportClient } from '@/components/sales-report/SalesReportClient'
 
@@ -18,7 +17,6 @@ export default async function SalesReportPage() {
           <p className="text-muted text-xs mt-0.5">Daily sales breakdown by machine</p>
         </div>
         <div className="flex items-center gap-2">
-          <CurrencyToggle />
           <ThemeToggle />
           <RefreshButton />
         </div>
