@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import type { Currency } from '@/lib/types'
 
-export const CurrencyContext = createContext<Currency>('KHR')
+export const CurrencyContext = createContext<Currency>('USD')
 
 /** Consume the active currency from context. */
 export function useCurrency(): Currency {
@@ -16,16 +16,16 @@ export function useCurrency(): Currency {
  * value matches whatever the header CurrencyToggle has set.
  */
 export function useCurrencyState(): Currency {
-  const [currency, setCurrency] = useState<Currency>('KHR')
+  const [currency, setCurrency] = useState<Currency>('USD')
 
   useEffect(() => {
     try {
-      if (localStorage.getItem('currency') === 'USD') {
+      if (localStorage.getItem('currency') === 'KHR') {
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setCurrency('USD')
+        setCurrency('KHR')
       }
     } catch {
-      // storage unavailable — stay on KHR
+      // storage unavailable — stay on USD
     }
     function onChange(e: Event) {
       const next = (e as CustomEvent<Currency>).detail

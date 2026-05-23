@@ -16,7 +16,7 @@ function unique(arr: string[]) {
 export function DatabaseClient({ transactions }: { transactions: Transaction[] }) {
   const currency = useCurrencyState()
   const [filters, setFilters] = useState<FilterState>({
-    search: '', machine: '', location: '', product: '', dateFrom: '', dateTo: '', currency: 'KHR',
+    search: '', machine: '', location: '', product: '', dateFrom: '', dateTo: '', currency: 'USD',
   })
 
   useEffect(() => {

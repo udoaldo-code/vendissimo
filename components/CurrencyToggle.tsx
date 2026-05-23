@@ -8,14 +8,14 @@ const EVENT = 'currencychange'
 
 function readStored(): Currency {
   try {
-    return localStorage.getItem(STORAGE_KEY) === 'USD' ? 'USD' : 'KHR'
+    return localStorage.getItem(STORAGE_KEY) === 'KHR' ? 'KHR' : 'USD'
   } catch {
-    return 'KHR'
+    return 'USD'
   }
 }
 
 export function CurrencyToggle() {
-  const [currency, setCurrency] = useState<Currency>('KHR')
+  const [currency, setCurrency] = useState<Currency>('USD')
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
