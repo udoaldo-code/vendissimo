@@ -1,12 +1,13 @@
-export const dynamic = 'force-dynamic'
-
-import { fetchDatabase } from '@/lib/sheets'
+import { fetchTransactions } from '@/lib/clickhouse'
 import { RefreshButton } from '@/components/RefreshButton'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { CurrencyToggle } from '@/components/CurrencyToggle'
 import { DatabaseClient } from '@/components/database/DatabaseClient'
 
+export const dynamic = 'force-dynamic'
+
 export default async function DatabasePage() {
-  const transactions = await fetchDatabase()
+  const transactions = await fetchTransactions()
 
   return (
     <div className="p-4 md:p-6">
@@ -14,10 +15,11 @@ export default async function DatabasePage() {
         <div>
           <h1 className="text-foreground text-xl font-bold">Database</h1>
           <p className="text-muted text-xs mt-0.5">
-            Vendissimo Daily Sales 2026 · {transactions.length.toLocaleString()} records
+            {transactions.length.toLocaleString()} records
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <CurrencyToggle />
           <ThemeToggle />
           <RefreshButton />
         </div>

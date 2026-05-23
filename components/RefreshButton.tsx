@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useTransition } from 'react'
-import { revalidateSheets } from '@/app/actions'
+import { revalidateData } from '@/app/actions'
 
 export function RefreshButton() {
   const router = useRouter()
@@ -10,7 +10,7 @@ export function RefreshButton() {
 
   function handleRefresh() {
     startTransition(async () => {
-      await revalidateSheets()
+      await revalidateData()
       router.refresh()
     })
   }
