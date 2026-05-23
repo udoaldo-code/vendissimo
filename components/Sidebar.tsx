@@ -11,8 +11,6 @@ const NAV_LINKS = [
   { href: '/sales-report', label: 'Sales Report', icon: '📄' },
 ]
 
-const DATABASE_LINK = { href: '/database', label: 'Database', icon: '🗃️' }
-
 export function Sidebar() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
@@ -77,31 +75,11 @@ export function Sidebar() {
           )
         })}
 
-        {(() => {
-          const link = DATABASE_LINK
-          const active = pathname === link.href
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setOpen(false)}
-              title={compact ? link.label : undefined}
-              className={`mt-auto flex items-center ${compact ? 'justify-center px-2' : 'gap-2.5 px-3'} py-2 rounded-md text-sm transition-colors ${
-                active
-                  ? `bg-surface-hover text-accent border-l-4 border-accent ${compact ? '' : 'pl-2'}`
-                  : 'text-muted-strong hover:text-foreground hover:bg-background'
-              }`}
-            >
-              <span className="text-base">{link.icon}</span>
-              {!compact && link.label}
-            </Link>
-          )
-        })()}
       </nav>
 
       <div className="p-3 border-t border-border">
         <p className={`text-muted text-xs ${compact ? 'text-center' : ''}`}>
-          {compact ? 'Live' : 'Data: Google Sheets - Live'}
+          {compact ? 'Live' : 'Data: ClickHouse'}
         </p>
       </div>
     </aside>
