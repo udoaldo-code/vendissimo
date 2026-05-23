@@ -1,4 +1,4 @@
-import type { Transaction, KPIs, MonthlyRow, ProductRow, MachineRow, WeekdayRevenue, DailyRevenue, DailySalesEntry, DailySalesMachineRow, DailySalesData, ExecSummaryData } from './types'
+import type { Currency, Transaction, KPIs, MonthlyRow, ProductRow, MachineRow, WeekdayRevenue, DailyRevenue, DailySalesEntry, DailySalesMachineRow, DailySalesData, ExecSummaryData } from './types'
 import { parseTransactionDate } from './filter-utils'
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -36,7 +36,9 @@ export function filterByDateRange(
 export function aggregateTransactions(
   transactions: Transaction[],
   categoryMap: Record<string, string>,
+  currency: Currency,
 ): ExecSummaryData {
+  transactions = transactions.filter(t => t.currency === currency)
   if (transactions.length === 0) {
     return {
       kpis: { totalRevenue: 0, totalTransactions: 0, unitsSold: 0, avgDailyRevenue: 0, peakDayRevenue: 0, peakDayDate: '—', activeMachines: 0, activeLocations: 0 },
