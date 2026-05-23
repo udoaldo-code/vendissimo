@@ -38,6 +38,7 @@ export function filterTransactions(transactions: Transaction[], filters: FilterS
   const search = filters.search.toLowerCase()
 
   return transactions.filter(t => {
+    if (t.currency !== filters.currency) return false
     if (search && !fuzzyMatch(t.product.toLowerCase(), search) && !fuzzyMatch(t.machine.toLowerCase(), search)) {
       return false
     }

@@ -2,13 +2,13 @@ import { filterTransactions, exportToCSVString, parseTransactionDate } from '@/l
 import type { Transaction, FilterState } from '@/lib/types'
 
 const SAMPLE: Transaction[] = [
-  { machine: 'V1 - KHMER House', location: 'Airport', product: 'OLATTE', unitPrice: 1.5, qty: 1, time: '2026-01-01 10:00:00', date: '1/1/2026' },
-  { machine: 'V1 - KHMER House', location: 'Airport', product: 'BACCHUS', unitPrice: 1.5, qty: 2, time: '2026-01-02 11:00:00', date: '1/2/2026' },
-  { machine: 'V4 - NPH', location: 'Hospital', product: 'Hi-Tech-Water', unitPrice: 0.5, qty: 3, time: '2026-02-01 09:00:00', date: '2/1/2026' },
+  { machine: 'V1 - KHMER House', location: 'Airport', product: 'OLATTE', unitPrice: 1.5, qty: 1, time: '2026-01-01 10:00:00', date: '1/1/2026', currency: 'USD' },
+  { machine: 'V1 - KHMER House', location: 'Airport', product: 'BACCHUS', unitPrice: 1.5, qty: 2, time: '2026-01-02 11:00:00', date: '1/2/2026', currency: 'USD' },
+  { machine: 'V4 - NPH', location: 'Hospital', product: 'Hi-Tech-Water', unitPrice: 0.5, qty: 3, time: '2026-02-01 09:00:00', date: '2/1/2026', currency: 'USD' },
 ]
 
 const EMPTY_FILTER: FilterState = {
-  search: '', machine: '', location: '', product: '', dateFrom: '', dateTo: '',
+  search: '', machine: '', location: '', product: '', dateFrom: '', dateTo: '', currency: 'USD',
 }
 
 describe('filterTransactions', () => {
@@ -58,6 +58,15 @@ describe('filterTransactions', () => {
     const result = filterTransactions(SAMPLE, { ...EMPTY_FILTER, location: 'Airport', dateFrom: '2026-01-02' })
     expect(result).toHaveLength(1)
     expect(result[0].product).toBe('BACCHUS')
+  })
+
+  it('filters by currency (keeps only matching currency rows)', () => {
+    const mixed: Transaction[] = [
+      ...SAMPLE,
+      { machine: 'V5', location: 'NPH', product: 'OLATTE', unitPrice: 5000, qty: 1, time: '2026-05-19 12:00:00', date: '5/19/2026', currency: 'KHR' },
+    ]
+    expect(filterTransactions(mixed, { ...EMPTY_FILTER, currency: 'USD' })).toHaveLength(3)
+    expect(filterTransactions(mixed, { ...EMPTY_FILTER, currency: 'KHR' })).toHaveLength(1)
   })
 })
 
