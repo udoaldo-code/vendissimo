@@ -70,6 +70,12 @@ export function buildCanonicalNames(rows: CHRow[]): Record<string, string> {
   return name
 }
 
+/** Format the dataset's latest sales_time as 'YYYY-MM-DD HH:MM' for a banner. */
+export function formatLastSync(salesTime: string | null): string {
+  if (!salesTime) return 'no data yet'
+  return salesTime.slice(0, 16)
+}
+
 /** Render an amount in the active currency. */
 export function formatMoney(amount: number, currency: Currency): string {
   if (currency === 'USD') {

@@ -5,7 +5,7 @@ import { DEVICE_LOCATIONS } from './locations'
 
 const CACHE_TTL_MS = 5 * 60_000 // 5 minutes — short enough that new sales appear quickly on every page
 
-let cache: { at: number; data: Transaction[] } | null = null
+let cache: { at: number; data: Transaction[]; lastSync: string | null } | null = null
 
 function client() {
   return createClient({
@@ -40,11 +40,20 @@ export async function fetchTransactions(): Promise<Transaction[]> {
     const rows = (await result.json()) as CHRow[]
     const canonicalNames = buildCanonicalNames(rows)
     const data = rows.map(r => rowToTransaction(r, DEVICE_LOCATIONS, canonicalNames))
-    cache = { at: Date.now(), data }
+    let lastSync: string | null = null
+    for (const r of rows) {
+      if (r.sales_time && (!lastSync || r.sales_time > lastSync)) lastSync = r.sales_time
+    }
+    cache = { at: Date.now(), data, lastSync }
     return data
   } finally {
     await ch.close()
   }
+}
+
+/** Most recent sales_time in the dataset (proxy for ETL freshness). Null if no data yet. */
+export function getLastSyncTime(): string | null {
+  return cache?.lastSync ?? null
 }
 
 /** Drop the in-process cache so the next call refetches from ClickHouse. */

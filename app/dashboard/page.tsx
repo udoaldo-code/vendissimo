@@ -1,4 +1,5 @@
-import { fetchTransactions } from '@/lib/clickhouse'
+import { fetchTransactions, getLastSyncTime } from '@/lib/clickhouse'
+import { formatLastSync } from '@/lib/transactions'
 import { PRODUCT_CATEGORIES } from '@/lib/categories'
 import { RefreshButton } from '@/components/RefreshButton'
 import { ThemeToggle } from '@/components/ThemeToggle'
@@ -8,13 +9,14 @@ export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
   const transactions = await fetchTransactions()
+  const lastSync = getLastSyncTime()
   return (
     <div className="p-4 md:p-6">
       <div className="flex items-center justify-between mb-6 pl-10 md:pl-0">
         <div>
           <h1 className="text-foreground text-xl font-bold">Dashboard</h1>
           <p className="text-muted text-xs mt-0.5">
-            {transactions.length.toLocaleString()} transactions
+            {transactions.length.toLocaleString()} transactions · Data through {formatLastSync(lastSync)}
           </p>
         </div>
         <div className="flex items-center gap-2">
