@@ -5,7 +5,7 @@ import { DEVICE_LOCATIONS } from './locations'
 
 const CACHE_TTL_MS = 5 * 60_000 // 5 minutes — short enough that new sales appear quickly on every page
 
-let cache: { at: number; data: Transaction[]; lastSync: string | null } | null = null
+let cache: { at: number; data: Transaction[]; lastSync: string | null; lastCron: string | null } | null = null
 
 function client() {
   return createClient({
@@ -44,11 +44,22 @@ export async function fetchTransactions(): Promise<Transaction[]> {
     for (const r of rows) {
       if (r.sales_time && (!lastSync || r.sales_time > lastSync)) lastSync = r.sales_time
     }
-    cache = { at: Date.now(), data, lastSync }
+    const cronResult = await ch.query({
+      query: 'SELECT max(scrape_timestamp) AS s FROM deliverydetail',
+      format: 'JSONEachRow',
+    })
+    const cronRows = (await cronResult.json()) as { s: string | null }[]
+    const lastCron = cronRows[0]?.s ?? null
+    cache = { at: Date.now(), data, lastSync, lastCron }
     return data
   } finally {
     await ch.close()
   }
+}
+
+/** Most recent scrape_timestamp = when the external cron last pushed to ClickHouse. */
+export function getLastCronTime(): string | null {
+  return cache?.lastCron ?? null
 }
 
 /** Most recent sales_time in the dataset (proxy for ETL freshness). Null if no data yet. */
