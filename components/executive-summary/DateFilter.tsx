@@ -1,6 +1,6 @@
 'use client'
 
-export type DatePreset = 'all' | 'today' | '7d' | '14d' | '30d' | 'custom'
+export type DatePreset = 'all' | 'today' | '7d' | '30d' | 'custom'
 
 type Props = {
   preset: DatePreset
@@ -13,7 +13,6 @@ const PRESETS: { key: DatePreset; label: string }[] = [
   { key: 'all', label: 'All' },
   { key: 'today', label: 'Today' },
   { key: '7d', label: 'Last 7 Days' },
-  { key: '14d', label: 'Last 14 Days' },
   { key: '30d', label: 'Last 30 Days' },
   { key: 'custom', label: 'Custom' },
 ]
@@ -30,7 +29,6 @@ export function DateFilter({ preset, dateFrom, dateTo, onChange }: Props) {
     if (p === 'all') onChange(p, '', '')
     else if (p === 'today') { const t = isoToday(); onChange(p, t, t) }
     else if (p === '7d') onChange(p, isoOffset(6), isoToday())
-    else if (p === '14d') onChange(p, isoOffset(13), isoToday())
     else if (p === '30d') onChange(p, isoOffset(29), isoToday())
     else onChange(p, dateFrom, dateTo)
   }

@@ -11,18 +11,11 @@ type Props = {
   categoryMap: Record<string, string>
 }
 
-function isoToday() {
-  return new Date().toISOString().slice(0, 10)
-}
-function isoOffset(days: number) {
-  return new Date(Date.now() - days * 86400000).toISOString().slice(0, 10)
-}
-
 export function SalesReportClient({ transactions, categoryMap }: Props) {
   const currency: Currency = 'USD'
-  const [preset, setPreset] = useState<DatePreset>('14d')
-  const [dateFrom, setDateFrom] = useState(isoOffset(13))
-  const [dateTo, setDateTo] = useState(isoToday())
+  const [preset, setPreset] = useState<DatePreset>('all')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
 
   function handleChange(p: DatePreset, from: string, to: string) {
     setPreset(p)
