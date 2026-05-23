@@ -1,6 +1,6 @@
 import { createClient } from '@clickhouse/client'
 import type { Transaction } from './types'
-import { rowToTransaction, type CHRow } from './transactions'
+import { rowToTransaction, buildCanonicalNames, type CHRow } from './transactions'
 import { DEVICE_LOCATIONS } from './locations'
 
 const CACHE_TTL_MS = 5 * 60_000 // 5 minutes — short enough that new sales appear quickly on every page
@@ -38,7 +38,8 @@ export async function fetchTransactions(): Promise<Transaction[]> {
       format: 'JSONEachRow',
     })
     const rows = (await result.json()) as CHRow[]
-    const data = rows.map(r => rowToTransaction(r, DEVICE_LOCATIONS))
+    const canonicalNames = buildCanonicalNames(rows)
+    const data = rows.map(r => rowToTransaction(r, DEVICE_LOCATIONS, canonicalNames))
     cache = { at: Date.now(), data }
     return data
   } finally {

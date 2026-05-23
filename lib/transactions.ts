@@ -24,13 +24,22 @@ function reformatDate(salesTime: string): string {
   return `${m}/${d}/${y}`
 }
 
-/** Map one ClickHouse row to the dashboard's Transaction shape. */
-export function rowToTransaction(row: CHRow, locations: Record<string, string>): Transaction {
+/**
+ * Map one ClickHouse row to the dashboard's Transaction shape.
+ * `canonicalNames[device_id]` overrides the per-row device_name so historic
+ * rows with stale names roll up under the machine's current name.
+ */
+export function rowToTransaction(
+  row: CHRow,
+  locations: Record<string, string>,
+  canonicalNames: Record<string, string> = {},
+): Transaction {
   const salesTime = row.sales_time ?? ''
   const price = row.sales_amount != null ? parseFloat(row.sales_amount) : 0
+  const id = row.device_id ?? ''
   return {
-    machine: row.device_name ?? '',
-    location: (row.device_id && locations[row.device_id]) || 'Unknown',
+    machine: (id && canonicalNames[id]) || row.device_name || '',
+    location: (id && locations[id]) || 'Unknown',
     product: row.product_name ?? '',
     unitPrice: Number.isNaN(price) ? 0 : price,
     qty: 1,
@@ -38,6 +47,27 @@ export function rowToTransaction(row: CHRow, locations: Record<string, string>):
     date: reformatDate(salesTime),
     currency: rowCurrency(salesTime),
   }
+}
+
+/**
+ * Build device_id → latest device_name from a list of CH rows.
+ * "Latest" = the row with the greatest sales_time string (lexicographic
+ * comparison works for 'YYYY-MM-DD HH:MM:SS').
+ */
+export function buildCanonicalNames(rows: CHRow[]): Record<string, string> {
+  const latestTime: Record<string, string> = {}
+  const name: Record<string, string> = {}
+  for (const r of rows) {
+    const id = r.device_id
+    const t = r.sales_time
+    const n = r.device_name
+    if (!id || !t || !n) continue
+    if (!latestTime[id] || t > latestTime[id]) {
+      latestTime[id] = t
+      name[id] = n
+    }
+  }
+  return name
 }
 
 /** Render an amount in the active currency. */
