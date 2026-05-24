@@ -10,11 +10,30 @@
 const FALLBACK_KHR_PER_USD = 4100
 
 const CACHE_TTL_MS = 24 * 60 * 60_000 // 24 hours
-const URL = 'https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/khr/usd.json'
+
+// Primary + fallback URLs. fawazahmed0/currency-api v1 (Cloudflare/jsDelivr
+// mirrors) returns `{ date, khr: { usd: number } }`.
+const URLS = [
+  'https://latest.currency-api.pages.dev/v1/currencies/khr.json',
+  'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/khr.json',
+]
 
 type Cache = { khrPerUsd: number; usdPerKhr: number; fetchedAt: number; source: 'api' | 'fallback' }
 
 let cache: Cache | null = null
+
+async function tryFetch(url: string): Promise<number | null> {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(8_000) })
+    if (!res.ok) return null
+    const json = (await res.json()) as { khr?: { usd?: number }; usd?: number }
+    // v1 shape: { khr: { usd } }; old shape: { usd } — accept both for resilience.
+    const usdPerKhr = Number(json?.khr?.usd ?? json?.usd)
+    return Number.isFinite(usdPerKhr) && usdPerKhr > 0 ? usdPerKhr : null
+  } catch {
+    return null
+  }
+}
 
 /**
  * Get the current KHR→USD conversion. Returns USD per 1 KHR
@@ -24,27 +43,24 @@ export async function getKhrToUsd(): Promise<Cache> {
   if (cache && Date.now() - cache.fetchedAt < CACHE_TTL_MS) {
     return cache
   }
-  try {
-    const res = await fetch(URL, { signal: AbortSignal.timeout(8_000) })
-    if (!res.ok) throw new Error(`fx api ${res.status}`)
-    const json = (await res.json()) as { usd: number }
-    const usdPerKhr = Number(json.usd)
-    if (!Number.isFinite(usdPerKhr) || usdPerKhr <= 0) throw new Error('fx api returned invalid rate')
-    cache = {
-      usdPerKhr,
-      khrPerUsd: 1 / usdPerKhr,
-      fetchedAt: Date.now(),
-      source: 'api',
+  for (const url of URLS) {
+    const usdPerKhr = await tryFetch(url)
+    if (usdPerKhr != null) {
+      cache = {
+        usdPerKhr,
+        khrPerUsd: 1 / usdPerKhr,
+        fetchedAt: Date.now(),
+        source: 'api',
+      }
+      return cache
     }
-    return cache
-  } catch (e) {
-    console.error('[fx] rate fetch failed, using fallback:', e instanceof Error ? e.message : e)
-    cache = {
-      usdPerKhr: 1 / FALLBACK_KHR_PER_USD,
-      khrPerUsd: FALLBACK_KHR_PER_USD,
-      fetchedAt: Date.now(),
-      source: 'fallback',
-    }
-    return cache
   }
+  console.warn('[fx] all FX endpoints failed, using fallback rate', FALLBACK_KHR_PER_USD)
+  cache = {
+    usdPerKhr: 1 / FALLBACK_KHR_PER_USD,
+    khrPerUsd: FALLBACK_KHR_PER_USD,
+    fetchedAt: Date.now(),
+    source: 'fallback',
+  }
+  return cache
 }
