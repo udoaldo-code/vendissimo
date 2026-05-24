@@ -20,6 +20,12 @@ function client() {
     // Compress the response so 21k JSON rows fit in a few hundred KB
     // instead of multiple MB over the WAN link to ClickHouse.
     compression: { request: false, response: true },
+    // Keep the HTTP connection alive during long queries so load-balancer
+    // idle timeouts do not kill the response stream.
+    clickhouse_settings: {
+      send_progress_in_http_headers: 1,
+      http_headers_progress_interval_ms: '10000',
+    },
   })
 }
 

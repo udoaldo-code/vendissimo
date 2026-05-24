@@ -29,7 +29,7 @@ export function Sidebar() {
             V
           </div>
         ) : (
-          <Image src="/logo.png" alt="Vendissimo" width={140} height={40} priority className="object-contain" style={{ height: 'auto' }} />
+          <Image src="/logo.png" alt="Vendissimo" width={140} height={40} priority className="object-contain" style={{ width: 'auto', height: 'auto' }} />
         )}
 
         <button
