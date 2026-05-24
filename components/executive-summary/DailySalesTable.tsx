@@ -41,7 +41,12 @@ type Props = {
 
 export function DailySalesTable({ dailySales, preset }: Props) {
   const currency = useCurrency()
-  const { dates, machines, locationTotals, grandTotal } = dailySales
+  const { dates, machines, locationTotals, grandTotal, kpiTarget } = dailySales
+
+  function cellTint(qty: number): string {
+    if (qty <= 0) return ''
+    return qty >= kpiTarget ? 'bg-emerald-500/15' : 'bg-danger/15'
+  }
 
   const displayDates = preset === 'all' ? dates.slice(-14) : dates.slice()
 
@@ -69,9 +74,10 @@ export function DailySalesTable({ dailySales, preset }: Props) {
     <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
       <div className="px-4 py-3 border-b border-border flex items-center justify-between">
         <p className="text-muted text-xs uppercase tracking-wider">Daily Sales by Machine</p>
-        {preset === 'all' && (
-          <span className="text-muted text-xs">Last 14 days shown · Totals reflect full period</span>
-        )}
+        <span className="text-muted text-xs">
+          {preset === 'all' && 'Last 14 days shown · Totals reflect full period · '}
+          KPI target ≥{kpiTarget} units/day
+        </span>
       </div>
       <div className="overflow-x-auto">
         <table className="text-xs border-collapse min-w-full">
@@ -84,6 +90,9 @@ export function DailySalesTable({ dailySales, preset }: Props) {
               <th colSpan={2} className="py-1.5 px-2 text-center text-accent font-semibold border-b border-border border-l border-border">
                 TOTAL
               </th>
+              <th colSpan={3} className="py-1.5 px-2 text-center text-accent-pink font-semibold border-b border-border border-l border-border">
+                KPI
+              </th>
               {displayDates.map(d => (
                 <th key={d} colSpan={2} className="py-1.5 px-2 text-center text-muted-strong font-medium border-b border-border border-l border-border">
                   {fmtDateHeader(d).day}
@@ -94,6 +103,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
             <tr className="bg-surface-hover">
               <th className="sticky left-0 z-10 bg-surface-hover border-b border-border" style={stickyStyle} />
               <th colSpan={2} className="border-b border-border border-l border-border" />
+              <th colSpan={3} className="border-b border-border border-l border-border" />
               {displayDates.map(d => (
                 <th key={d} colSpan={2} className="py-1 px-2 text-center text-muted-strong font-normal border-b border-border border-l border-border">
                   {fmtDateHeader(d).date}
@@ -105,6 +115,9 @@ export function DailySalesTable({ dailySales, preset }: Props) {
               <th className="sticky left-0 z-10 bg-surface-hover border-b border-border" style={stickyStyle} />
               <th className="py-1 px-2 text-right text-accent font-semibold border-b border-border border-l border-border whitespace-nowrap">Qty</th>
               <th className="py-1 px-2 text-right text-accent font-semibold border-b border-border whitespace-nowrap">Rev</th>
+              <th className="py-1 px-2 text-right text-accent-pink font-semibold border-b border-border border-l border-border whitespace-nowrap">Active</th>
+              <th className="py-1 px-2 text-right text-accent-pink font-semibold border-b border-border whitespace-nowrap">Met</th>
+              <th className="py-1 px-2 text-center text-accent-pink font-semibold border-b border-border whitespace-nowrap">Status</th>
               {displayDates.map(d => (
                 <Fragment key={d}>
                   <th className="py-1 px-2 text-right text-muted font-medium border-b border-border border-l border-border whitespace-nowrap">Qty</th>
@@ -126,6 +139,9 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                     </td>
                     <td className={`${numCell} border-l border-border font-semibold`} style={{ color }}>{lt.totalQty}</td>
                     <td className={`${numCell} font-semibold`} style={{ color }}>{formatMoney(lt.totalRev, currency)}</td>
+                    <td className={`${numCell} border-l border-border`} />
+                    <td className={numCell} />
+                    <td className={numCell} />
                     {displayDates.map(d => {
                       const e = entry(lt.daily, d)
                       return (
@@ -141,26 +157,37 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                     })}
                   </tr>
                   {/* Machine rows */}
-                  {byLocation[loc].map(m => (
+                  {byLocation[loc].map(m => {
+                    const statusBadge = m.kpiStatus === 'met'
+                      ? <span className="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded text-xs font-semibold">Met</span>
+                      : m.kpiStatus === 'below'
+                        ? <span className="bg-danger/20 text-danger px-2 py-0.5 rounded text-xs font-semibold">Below</span>
+                        : <span className="text-muted text-xs">Idle</span>
+                    return (
                     <tr key={m.machine} className="hover:bg-surface-hover">
                       <td className={`sticky left-0 z-10 bg-card ${stickyTd} text-foreground pl-5`} style={stickyStyle}>{m.machine}</td>
                       <td className={`${numCell} text-muted-strong border-l border-border`}>{m.totalQty}</td>
                       <td className={`${numCell} text-muted-strong`}>{formatMoney(m.totalRev, currency)}</td>
+                      <td className={`${numCell} text-foreground border-l border-border font-medium`}>{m.dayActive}</td>
+                      <td className={`${numCell} text-foreground font-medium`}>{m.dayMet}</td>
+                      <td className={`${tdBase} text-center`}>{statusBadge}</td>
                       {displayDates.map(d => {
                         const e = entry(m.daily, d)
+                        const tint = cellTint(e.qty)
                         return (
                           <Fragment key={d}>
-                            <td className={`${numCell} text-muted-strong border-l border-border`}>
+                            <td className={`${numCell} text-muted-strong border-l border-border ${tint}`}>
                               {e.qty}
                             </td>
-                            <td className={`${numCell} text-muted-strong`}>
+                            <td className={`${numCell} text-muted-strong ${tint}`}>
                               {formatMoney(e.rev, currency)}
                             </td>
                           </Fragment>
                         )
                       })}
                     </tr>
-                  ))}
+                    )
+                  })}
                 </Fragment>
               )
             })}
@@ -175,6 +202,9 @@ export function DailySalesTable({ dailySales, preset }: Props) {
               <td className="py-2 px-2 text-right text-[#a78bfa] font-bold text-xs tabular-nums whitespace-nowrap">
                 {formatMoney(grandTotal.totalRev, currency)}
               </td>
+              <td className="py-2 px-2 border-l border-white/20" />
+              <td className="py-2 px-2" />
+              <td className="py-2 px-2" />
               {displayDates.map(d => {
                 const e = entry(grandTotal.daily, d)
                 return (

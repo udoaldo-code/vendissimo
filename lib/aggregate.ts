@@ -1,5 +1,6 @@
 import type { Currency, Transaction, KPIs, MonthlyRow, ProductRow, MachineRow, WeekdayRevenue, DailyRevenue, DailySalesEntry, DailySalesMachineRow, DailySalesData, ExecSummaryData } from './types'
 import { parseTransactionDate } from './filter-utils'
+import { getKpiTarget } from './kpi'
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December']
@@ -47,7 +48,7 @@ export function aggregateTransactions(
       machines: [],
       weekday: { sun: 0, mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0 },
       daily: [],
-      dailySales: { dates: [], machines: [], locationTotals: {}, grandTotal: { daily: {}, totalQty: 0, totalRev: 0 } },
+      dailySales: { dates: [], machines: [], locationTotals: {}, grandTotal: { daily: {}, totalQty: 0, totalRev: 0 }, kpiTarget: getKpiTarget() },
     }
   }
 
@@ -156,15 +157,29 @@ export function aggregateTransactions(
     .sort((a, b) => parseTransactionDate(a.date).getTime() - parseTransactionDate(b.date).getTime())
 
   // Daily Sales Per Machine (pivot: machine × date)
+  const target = getKpiTarget()
   const machineMap: Record<string, DailySalesMachineRow> = {}
   for (const t of transactions) {
-    if (!machineMap[t.machine]) machineMap[t.machine] = { location: t.location, machine: t.machine, daily: {}, totalQty: 0, totalRev: 0 }
+    if (!machineMap[t.machine]) machineMap[t.machine] = {
+      location: t.location, machine: t.machine, daily: {}, totalQty: 0, totalRev: 0,
+      dayActive: 0, dayMet: 0, kpiStatus: 'idle',
+    }
     const row = machineMap[t.machine]
     if (!row.daily[t.date]) row.daily[t.date] = { qty: 0, rev: 0 }
     row.daily[t.date].qty += t.qty
     row.daily[t.date].rev += t.unitPrice * t.qty
     row.totalQty += t.qty
     row.totalRev += t.unitPrice * t.qty
+  }
+  for (const row of Object.values(machineMap)) {
+    let active = 0, met = 0
+    for (const e of Object.values(row.daily)) {
+      if (e.qty > 0) active++
+      if (e.qty >= target) met++
+    }
+    row.dayActive = active
+    row.dayMet = met
+    row.kpiStatus = active === 0 ? 'idle' : met === active ? 'met' : 'below'
   }
   const dssMachines = Object.values(machineMap).sort((a, b) => a.location.localeCompare(b.location) || a.machine.localeCompare(b.machine))
 
@@ -186,7 +201,7 @@ export function aggregateTransactions(
   const dssDates = [...new Set(transactions.map(t => t.date).filter(Boolean))]
     .sort((a, b) => parseTransactionDate(a).getTime() - parseTransactionDate(b).getTime())
 
-  const dailySales: DailySalesData = { dates: dssDates, machines: dssMachines, locationTotals, grandTotal }
+  const dailySales: DailySalesData = { dates: dssDates, machines: dssMachines, locationTotals, grandTotal, kpiTarget: target }
 
   return { kpis, monthly, products, machines, weekday, daily, dailySales }
 }

@@ -50,12 +50,17 @@ export type DailyRevenue = { date: string; revenue: number }
 
 export type DailySalesEntry = { qty: number; rev: number }
 
+export type KpiStatus = 'met' | 'below' | 'idle'
+
 export type DailySalesMachineRow = {
   location: string
   machine: string
   daily: Record<string, DailySalesEntry>
   totalQty: number
   totalRev: number
+  dayActive: number
+  dayMet: number
+  kpiStatus: KpiStatus
 }
 
 export type DailySalesData = {
@@ -63,6 +68,7 @@ export type DailySalesData = {
   machines: DailySalesMachineRow[]
   locationTotals: Record<string, { daily: Record<string, DailySalesEntry>; totalQty: number; totalRev: number }>
   grandTotal: { daily: Record<string, DailySalesEntry>; totalQty: number; totalRev: number }
+  kpiTarget: number
 }
 
 export type ExecSummaryData = {
