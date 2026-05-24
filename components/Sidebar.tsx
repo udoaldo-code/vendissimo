@@ -33,7 +33,7 @@ export function Sidebar() {
         )}
 
         <button
-          className="hidden md:inline-flex w-8 h-8 rounded-md border border-border text-muted hover:text-accent items-center justify-center"
+          className="hidden md:inline-flex w-9 h-9 rounded-md bg-card border border-border text-muted-strong hover:text-accent hover:bg-surface-hover hover:border-border-strong shadow-sm transition-colors items-center justify-center"
           onClick={() => setCollapsed(v => !v)}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}

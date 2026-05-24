@@ -99,7 +99,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
         )}
       </div>
       <div className="overflow-x-auto">
-        <table className="text-xs border-collapse min-w-full">
+        <table className="text-xs border-collapse w-full">
           <thead>
             {/* Row 1: day names */}
             <tr className="bg-surface-hover">
