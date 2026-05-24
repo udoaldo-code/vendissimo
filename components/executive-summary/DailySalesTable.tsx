@@ -163,13 +163,32 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                         const e = entry(m.daily, d)
                         const tint = cellTint(e.qty)
                         const title = cellTitle(e.qty, fmtDateHeader(d).date)
+                        const status: 'met' | 'below' | 'idle' =
+                          e.qty <= 0 ? 'idle' : e.qty >= kpiTarget ? 'met' : 'below'
+                        const dotClass =
+                          status === 'met' ? 'bg-emerald-400'
+                          : status === 'below' ? 'bg-danger'
+                          : 'bg-muted'
+                        const tooltip = (
+                          <div
+                            role="tooltip"
+                            className="pointer-events-none absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-1 px-2.5 py-1.5 rounded-md bg-card border border-border shadow-lg text-foreground text-xs whitespace-nowrap opacity-0 scale-95 group-hover/cell:opacity-100 group-hover/cell:scale-100 transition duration-100"
+                          >
+                            <div className="flex items-center gap-1.5">
+                              <span className={`inline-block w-1.5 h-1.5 rounded-full ${dotClass}`} />
+                              <span>{title}</span>
+                            </div>
+                          </div>
+                        )
                         return (
                           <Fragment key={d}>
-                            <td title={title} className={`${numCell} text-muted-strong border-l border-border cursor-help ${tint}`}>
+                            <td className={`${numCell} text-muted-strong border-l border-border cursor-help relative group/cell ${tint}`}>
                               {e.qty}
+                              {tooltip}
                             </td>
-                            <td title={title} className={`${numCell} text-muted-strong cursor-help ${tint}`}>
+                            <td className={`${numCell} text-muted-strong cursor-help relative group/cell ${tint}`}>
                               {formatMoney(e.rev, currency)}
+                              {tooltip}
                             </td>
                           </Fragment>
                         )
