@@ -23,13 +23,13 @@ export function Sidebar() {
 
   const nav = (
     <aside className={`${compact ? 'w-[4.5rem]' : 'w-56'} h-full bg-card border-r border-border flex flex-col transition-[width] duration-200`}>
-      <div className="p-4 border-b border-border flex items-center justify-between">
+      <div className="p-3 border-b border-border flex items-center justify-between gap-2">
         {compact ? (
           <div className="hidden md:flex w-8 h-8 rounded-md border border-border items-center justify-center text-accent font-semibold text-sm">
             V
           </div>
         ) : (
-          <Image src="/logo.png" alt="Vendissimo" width={140} height={40} priority className="object-contain" style={{ width: 'auto', height: 'auto' }} />
+          <Image src="/logo.png" alt="Vendissimo" width={96} height={28} priority className="object-contain shrink min-w-0" style={{ width: 'auto', height: 'auto', maxHeight: 28 }} />
         )}
 
         <button
