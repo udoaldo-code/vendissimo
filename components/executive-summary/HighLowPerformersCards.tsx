@@ -41,7 +41,7 @@ function PerformerCard({ title, icon, tone, items, kpiTarget }: CardProps) {
                 <div className="text-muted text-xs">{m.location}</div>
               </div>
               <div className="text-right whitespace-nowrap">
-                <div className={`text-base font-bold tabular-nums ${rowMetric}`}>{m.avgPerDay.toFixed(1)}</div>
+                <div className={`text-base font-bold tabular-nums ${rowMetric}`}>{Math.round(m.avgPerDay)}</div>
                 <div className="text-muted text-[10px] uppercase tracking-wider">units/day</div>
               </div>
             </li>
