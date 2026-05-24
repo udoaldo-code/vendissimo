@@ -79,12 +79,24 @@ export function DailySalesTable({ dailySales, preset }: Props) {
 
   return (
     <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
-      <div className="px-4 py-3 border-b border-border flex items-center justify-between">
-        <p className="text-muted text-xs uppercase tracking-wider">Daily Sales by Machine</p>
-        <span className="text-muted text-xs">
-          {preset === 'all' && 'Last 14 days shown · Totals reflect full period · '}
-          KPI target ≥{kpiTarget} units/day
-        </span>
+      <div className="px-4 py-3 border-b border-border flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-4 flex-wrap">
+          <p className="text-muted text-xs uppercase tracking-wider">Daily Sales by Machine</p>
+          <span className="text-muted-strong text-xs">
+            KPI: ≥ {kpiTarget} units sold/day
+          </span>
+          <span className="flex items-center gap-1.5 text-xs text-muted">
+            <span className="inline-block w-3 h-3 rounded-sm bg-emerald-500/30 border border-emerald-500/50" />
+            Met (≥{kpiTarget})
+          </span>
+          <span className="flex items-center gap-1.5 text-xs text-muted">
+            <span className="inline-block w-3 h-3 rounded-sm bg-danger/30 border border-danger/50" />
+            Below ({'<'}{kpiTarget})
+          </span>
+        </div>
+        {preset === 'all' && (
+          <span className="text-muted text-xs">Last 14 days shown · Totals reflect full period</span>
+        )}
       </div>
       <div className="overflow-x-auto">
         <table className="text-xs border-collapse min-w-full">
