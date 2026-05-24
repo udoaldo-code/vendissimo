@@ -33,16 +33,27 @@ export function Sidebar() {
         )}
 
         <button
-          className="hidden md:inline-flex w-9 h-9 rounded-md bg-card border border-border text-muted-strong hover:text-accent hover:bg-surface-hover hover:border-border-strong shadow-sm transition-colors items-center justify-center"
+          type="button"
+          className="hidden md:inline-flex w-10 h-10 rounded-lg bg-surface-hover border border-border-strong text-foreground hover:text-accent hover:bg-card hover:border-accent shadow-sm transition-all items-center justify-center"
           onClick={() => setCollapsed(v => !v)}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          <span className={`flex flex-col items-center justify-center gap-1 transition-transform duration-300 ${collapsed ? 'rotate-0 scale-100' : 'rotate-180 scale-95'}`}>
-            <span className={`block h-0.5 bg-current rounded-full transition-all duration-300 ${collapsed ? 'w-4' : 'w-3.5'}`} />
-            <span className={`block h-0.5 bg-current rounded-full transition-all duration-300 ${collapsed ? 'w-4' : 'w-2.5'}`} />
-            <span className={`block h-0.5 bg-current rounded-full transition-all duration-300 ${collapsed ? 'w-4' : 'w-3.5'}`} />
-          </span>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.25"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={`transition-transform duration-300 ${collapsed ? 'rotate-0' : 'rotate-180'}`}
+          >
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="15" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
         </button>
 
         <button
