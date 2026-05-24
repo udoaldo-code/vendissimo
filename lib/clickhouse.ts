@@ -16,7 +16,10 @@ function client() {
     database: process.env.CLICKHOUSE_DB,
     username: process.env.CLICKHOUSE_USER,
     password: process.env.CLICKHOUSE_PASSWORD,
-    request_timeout: 30_000,
+    request_timeout: 120_000,
+    // Compress the response so 21k JSON rows fit in a few hundred KB
+    // instead of multiple MB over the WAN link to ClickHouse.
+    compression: { request: false, response: true },
   })
 }
 
@@ -38,7 +41,7 @@ export async function fetchTransactions(): Promise<Transaction[]> {
     // Combine both queries into one round trip so there is no idle window.
     const rowsResult = await ch.query({
       query: `
-        SELECT device_id, device_name, product_name, product_brand, sales_amount, sales_time
+        SELECT device_id, device_name, product_name, sales_amount, sales_time
         FROM deliverydetail
         WHERE sales_time IS NOT NULL AND sales_amount IS NOT NULL
         ORDER BY sales_time
