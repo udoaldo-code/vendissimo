@@ -10,6 +10,7 @@ import { DateFilter, type DatePreset } from './DateFilter'
 import { KPISidebar } from './KPISidebar'
 import { TopProductsTable } from './TopProductsTable'
 import { MachinePerformanceTable } from './MachinePerformanceTable'
+import { HighLowPerformersCards } from './HighLowPerformersCards'
 
 function PanelSkeleton({ heightClass }: { heightClass: string }) {
   return <div className={`bg-card border border-border rounded-lg shadow-sm animate-pulse ${heightClass}`} />
@@ -107,11 +108,12 @@ export function ExecSummaryClient({ transactions, categoryMap }: Props) {
             ))}
           </div>
 
-          {/* Desktop: KPI top + charts */}
+          {/* Desktop: KPI top + performers + charts */}
           <div className="hidden md:flex md:flex-col gap-4">
             <div className="w-full">
               <KPISidebar kpis={data.kpis} />
             </div>
+            <HighLowPerformersCards dailySales={data.dailySales} />
             <div className="flex flex-col gap-4 min-w-0">
               {charts}
             </div>
@@ -119,6 +121,7 @@ export function ExecSummaryClient({ transactions, categoryMap }: Props) {
 
           {/* Mobile: stacked charts */}
           <div className="flex flex-col gap-4 md:hidden">
+            <HighLowPerformersCards dailySales={data.dailySales} />
             {charts}
           </div>
         </>
