@@ -43,7 +43,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
   const currency = useCurrency()
   const { dates, machines, locationTotals, grandTotal } = dailySales
 
-  const displayDates = (preset === 'all' ? dates.slice(-14) : dates).slice().reverse()
+  const displayDates = preset === 'all' ? dates.slice(-14) : dates.slice()
 
   if (displayDates.length === 0 || machines.length === 0) return null
 
