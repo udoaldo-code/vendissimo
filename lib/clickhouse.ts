@@ -29,9 +29,14 @@ export async function fetchTransactions(): Promise<Transaction[]> {
   if (cache && Date.now() - cache.at < CACHE_TTL_MS) {
     return cache.data
   }
+  // Fetch FX rate BEFORE opening CH client so a slow FX response cannot
+  // idle out the CH connection between its two queries.
+  const fxRate = await getKhrToUsd()
+
   const ch = client()
   try {
-    const result = await ch.query({
+    // Combine both queries into one round trip so there is no idle window.
+    const rowsResult = await ch.query({
       query: `
         SELECT device_id, device_name, product_name, product_brand, sales_amount, sales_time
         FROM deliverydetail
@@ -40,20 +45,22 @@ export async function fetchTransactions(): Promise<Transaction[]> {
       `,
       format: 'JSONEachRow',
     })
-    const rows = (await result.json()) as CHRow[]
-    const canonicalNames = buildCanonicalNames(rows)
-    const fxRate = await getKhrToUsd()
-    const data = rows.map(r => rowToTransaction(r, DEVICE_LOCATIONS, canonicalNames, fxRate.usdPerKhr))
-    let lastSync: string | null = null
-    for (const r of rows) {
-      if (r.sales_time && (!lastSync || r.sales_time > lastSync)) lastSync = r.sales_time
-    }
+    const rows = (await rowsResult.json()) as CHRow[]
+
     const cronResult = await ch.query({
       query: 'SELECT max(scrape_timestamp) AS s FROM deliverydetail',
       format: 'JSONEachRow',
     })
     const cronRows = (await cronResult.json()) as { s: string | null }[]
     const lastCron = cronRows[0]?.s ?? null
+
+    const canonicalNames = buildCanonicalNames(rows)
+    const data = rows.map(r => rowToTransaction(r, DEVICE_LOCATIONS, canonicalNames, fxRate.usdPerKhr))
+    let lastSync: string | null = null
+    for (const r of rows) {
+      if (r.sales_time && (!lastSync || r.sales_time > lastSync)) lastSync = r.sales_time
+    }
+
     cache = {
       at: Date.now(),
       data,
