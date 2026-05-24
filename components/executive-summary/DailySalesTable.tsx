@@ -98,8 +98,8 @@ export function DailySalesTable({ dailySales, preset }: Props) {
           <span className="text-muted text-xs">Last 14 days shown · Totals reflect full period</span>
         )}
       </div>
-      <div className="overflow-x-auto">
-        <table className="text-xs border-collapse w-full" style={{ width: '100%', tableLayout: 'auto' }}>
+      <div className="overflow-x-auto w-full">
+        <table className="text-xs border-collapse" style={{ width: '100%' }}>
           <thead>
             {/* Row 1: day names */}
             <tr className="bg-surface-hover">
@@ -114,6 +114,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                   {fmtDateHeader(d).day}
                 </th>
               ))}
+              <th className="border-b border-border" style={{ width: '100%' }} />
             </tr>
             {/* Row 2: dates */}
             <tr className="bg-surface-hover">
@@ -124,6 +125,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                   {fmtDateHeader(d).date}
                 </th>
               ))}
+              <th className="border-b border-border" />
             </tr>
             {/* Row 3: Qty / Rev sub-headers */}
             <tr className="bg-surface-hover">
@@ -136,6 +138,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                   <th className="py-1 px-2 text-right text-muted font-medium border-b border-border whitespace-nowrap">Rev</th>
                 </Fragment>
               ))}
+              <th className="border-b border-border" />
             </tr>
           </thead>
           <tbody>
@@ -164,6 +167,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                         </Fragment>
                       )
                     })}
+                    <td className="border-b border-border" />
                   </tr>
                   {/* Machine rows */}
                   {byLocation[loc].map(m => (
@@ -205,6 +209,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                           </Fragment>
                         )
                       })}
+                      <td className="border-b border-border" />
                     </tr>
                   ))}
                 </Fragment>
@@ -234,6 +239,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                   </Fragment>
                 )
               })}
+              <td />
             </tr>
           </tbody>
         </table>
