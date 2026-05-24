@@ -25,7 +25,7 @@ export function Sidebar() {
     <aside className={`${compact ? 'w-[4.5rem]' : 'w-56'} h-full bg-card border-r border-border flex flex-col transition-[width] duration-200`}>
       <div className="p-3 border-b border-border flex items-center justify-between gap-2">
         {compact ? (
-          <Image src="/logo.png" alt="Vendissimo" width={32} height={32} priority className="hidden md:block object-contain" style={{ width: 32, height: 'auto' }} />
+          <Image src="/logo-mark.png" alt="Vendissimo" width={32} height={32} priority className="hidden md:block object-contain" style={{ width: 32, height: 32 }} />
         ) : (
           <Image src="/logo.png" alt="Vendissimo" width={96} height={28} priority className="object-contain shrink min-w-0" style={{ width: 'auto', height: 'auto', maxHeight: 28 }} />
         )}
