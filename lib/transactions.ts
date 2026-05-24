@@ -26,26 +26,33 @@ function reformatDate(salesTime: string): string {
 
 /**
  * Map one ClickHouse row to the dashboard's Transaction shape.
- * `canonicalNames[device_id]` overrides the per-row device_name so historic
- * rows with stale names roll up under the machine's current name.
+ *
+ * - `canonicalNames[device_id]` overrides the per-row device_name so historic
+ *   rows with stale names roll up under the machine's current name.
+ * - `usdPerKhr` is used to convert KHR rows (sales_time >= CURRENCY_CUTOFF) to
+ *   USD at ingest, so the dashboard works in a single unified currency.
  */
 export function rowToTransaction(
   row: CHRow,
   locations: Record<string, string>,
   canonicalNames: Record<string, string> = {},
+  usdPerKhr: number = 1 / 4100,
 ): Transaction {
   const salesTime = row.sales_time ?? ''
-  const price = row.sales_amount != null ? parseFloat(row.sales_amount) : 0
+  const rawPrice = row.sales_amount != null ? parseFloat(row.sales_amount) : 0
+  const safePrice = Number.isNaN(rawPrice) ? 0 : rawPrice
+  const originalCurrency = rowCurrency(salesTime)
+  const usdPrice = originalCurrency === 'KHR' ? safePrice * usdPerKhr : safePrice
   const id = row.device_id ?? ''
   return {
     machine: (id && canonicalNames[id]) || row.device_name || '',
     location: (id && locations[id]) || 'Unknown',
     product: row.product_name ?? '',
-    unitPrice: Number.isNaN(price) ? 0 : price,
+    unitPrice: usdPrice,
     qty: 1,
     time: salesTime.slice(11, 19),
     date: reformatDate(salesTime),
-    currency: rowCurrency(salesTime),
+    currency: 'USD',
   }
 }
 
@@ -74,6 +81,13 @@ export function buildCanonicalNames(rows: CHRow[]): Record<string, string> {
 export function formatLastSync(salesTime: string | null): string {
   if (!salesTime) return 'no data yet'
   return salesTime.slice(0, 16)
+}
+
+/** Format the KHR/USD rate for a header banner, with a tag for fallback source. */
+export function formatFxRate(rate: number | null, source: 'api' | 'fallback' | null): string {
+  if (rate == null) return 'FX n/a'
+  const rounded = Math.round(rate).toLocaleString('en-US')
+  return source === 'fallback' ? `FX ${rounded} KHR/USD (fallback)` : `FX ${rounded} KHR/USD`
 }
 
 /** Render an amount in the active currency. */

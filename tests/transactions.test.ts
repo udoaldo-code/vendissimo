@@ -39,10 +39,12 @@ describe('rowToTransaction', () => {
     expect(rowToTransaction(row, {}).location).toBe('Unknown')
   })
 
-  it('tags rows on/after 2026-05-19 as KHR', () => {
-    const khr: CHRow = { ...row, sales_time: '2026-05-19 00:00:00', sales_amount: '2500' }
-    expect(rowToTransaction(khr, {}).currency).toBe('KHR')
-    expect(rowToTransaction(khr, {}).unitPrice).toBe(2500)
+  it('converts KHR rows to USD at the supplied rate and tags currency=USD', () => {
+    const khr: CHRow = { ...row, sales_time: '2026-05-19 00:00:00', sales_amount: '4100' }
+    const usdPerKhr = 1 / 4100
+    const tx = rowToTransaction(khr, {}, {}, usdPerKhr)
+    expect(tx.currency).toBe('USD')
+    expect(tx.unitPrice).toBeCloseTo(1, 6) // 4100 KHR / 4100 = 1 USD
   })
 
   it('treats a malformed amount as 0', () => {

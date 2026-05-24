@@ -2,10 +2,13 @@ import { createClient } from '@clickhouse/client'
 import type { Transaction } from './types'
 import { rowToTransaction, buildCanonicalNames, type CHRow } from './transactions'
 import { DEVICE_LOCATIONS } from './locations'
+import { getKhrToUsd } from './fx'
 
 const CACHE_TTL_MS = 5 * 60_000 // 5 minutes — short enough that new sales appear quickly on every page
 
-let cache: { at: number; data: Transaction[]; lastSync: string | null; lastCron: string | null } | null = null
+type FxInfo = { khrPerUsd: number; fetchedAt: number; source: 'api' | 'fallback' }
+
+let cache: { at: number; data: Transaction[]; lastSync: string | null; lastCron: string | null; fx: FxInfo | null } | null = null
 
 function client() {
   return createClient({
@@ -39,7 +42,8 @@ export async function fetchTransactions(): Promise<Transaction[]> {
     })
     const rows = (await result.json()) as CHRow[]
     const canonicalNames = buildCanonicalNames(rows)
-    const data = rows.map(r => rowToTransaction(r, DEVICE_LOCATIONS, canonicalNames))
+    const fxRate = await getKhrToUsd()
+    const data = rows.map(r => rowToTransaction(r, DEVICE_LOCATIONS, canonicalNames, fxRate.usdPerKhr))
     let lastSync: string | null = null
     for (const r of rows) {
       if (r.sales_time && (!lastSync || r.sales_time > lastSync)) lastSync = r.sales_time
@@ -50,7 +54,13 @@ export async function fetchTransactions(): Promise<Transaction[]> {
     })
     const cronRows = (await cronResult.json()) as { s: string | null }[]
     const lastCron = cronRows[0]?.s ?? null
-    cache = { at: Date.now(), data, lastSync, lastCron }
+    cache = {
+      at: Date.now(),
+      data,
+      lastSync,
+      lastCron,
+      fx: { khrPerUsd: fxRate.khrPerUsd, fetchedAt: fxRate.fetchedAt, source: fxRate.source },
+    }
     return data
   } finally {
     await ch.close()
@@ -60,6 +70,11 @@ export async function fetchTransactions(): Promise<Transaction[]> {
 /** Most recent scrape_timestamp = when the external cron last pushed to ClickHouse. */
 export function getLastCronTime(): string | null {
   return cache?.lastCron ?? null
+}
+
+/** KHR→USD conversion info used during the last fetch (null if not loaded yet). */
+export function getFxInfo(): FxInfo | null {
+  return cache?.fx ?? null
 }
 
 /** Most recent sales_time in the dataset (proxy for ETL freshness). Null if no data yet. */
