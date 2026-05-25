@@ -81,6 +81,9 @@ type Props = {
 // Apply override locationKey to a machine row (returns rebound row with
 // override's locationKey as the display "location" so cross-loc drag is
 // reflected optimistically). machine display name uses override too.
+// In edit mode reflect machine.name + machine.locationKey overrides only.
+// Location LABEL is rendered via locationDisplay() so the underlying key
+// (used by drag-drop + grouping) stays stable while label is editable.
 function applyDraftToRow(m: DailySalesMachineRow, draft: Overrides): DailySalesMachineRow {
   const ov = draft.machines[m.deviceId]
   if (!ov) return m
@@ -219,6 +222,18 @@ export function DailySalesTable({ dailySales, preset }: Props) {
     }))
   }
 
+  function renameLocation(locKey: string, newLabel: string) {
+    setDraft(prev => ({
+      ...prev,
+      locations: { ...prev.locations, [locKey]: { ...(prev.locations[locKey] ?? {}), label: newLabel } },
+    }))
+  }
+
+  // Pretty label for a location key — picks draft override if user is editing.
+  function locationDisplay(locKey: string): string {
+    return draft.locations[locKey]?.label ?? locKey
+  }
+
   // Render a single machine row (used for both edit + non-edit modes).
   const renderMachineRow = (m: DailySalesMachineRow, locKey: string, dragHandle?: { setActivatorNodeRef: (el: HTMLElement | null) => void; listeners: Record<string, unknown> | undefined }) => (
     <>
@@ -315,7 +330,18 @@ export function DailySalesTable({ dailySales, preset }: Props) {
         {/* Location header */}
         <tr style={{ backgroundColor: color + '18' }}>
           <td className={`sticky left-0 z-10 ${stickyTd} font-semibold border-l-4`} style={{ color, borderLeftColor: color, backgroundColor: locationBg(loc), boxShadow: '2px 0 4px rgba(0,0,0,0.06)' }}>
-            {loc}
+            {isEditMode ? (
+              <input
+                type="text"
+                defaultValue={locationDisplay(loc)}
+                onBlur={(e) => renameLocation(loc, e.target.value.trim())}
+                className="bg-background border border-accent rounded px-1.5 py-0.5 text-xs font-semibold w-full"
+                style={{ color }}
+                title="Rename location (label only — does not move machines)"
+              />
+            ) : (
+              locationDisplay(loc)
+            )}
           </td>
           {weekBuckets.map(wk => {
             const wkQty = weekTotalQty(lt.daily, wk.dates)

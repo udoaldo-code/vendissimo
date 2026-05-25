@@ -52,9 +52,11 @@ export function rowToTransaction(
 
   const staticLoc = (id && locations[id]) || ''
   const overrideKey = overrideMachine?.locationKey
-  const locationLabel = overrideKey
-    ? (overrides?.locations[overrideKey]?.label ?? overrideKey)
-    : (staticLoc || 'Unknown')
+  // Base "key" for label lookup: explicit override wins, then static map.
+  const baseKey = overrideKey ?? staticLoc
+  const locationLabel = baseKey
+    ? (overrides?.locations[baseKey]?.label ?? baseKey)
+    : 'Unknown'
 
   return {
     deviceId: id,
