@@ -1125,11 +1125,11 @@ git commit -m "feat(sales-report): wire EditProvider + Toggle + Banner"
 
 ---
 
-## Task 16: Inline rename + drag-drop in DailySalesTable
+## Task 16: Inline rename + cross-location drag-drop in DailySalesTable
 
 **Files:** Modify `components/executive-summary/DailySalesTable.tsx`
 
-This is the largest single edit. Read the current file fully before editing — it has 350+ lines already.
+This is the largest single edit. Read the current file fully before editing — it has 350+ lines already. Cross-location drag uses one `DndContext` covering all rows, with each location group declared as a droppable container.
 
 - [ ] **Step 1: Import dnd-kit + EditContext**
 
@@ -1137,11 +1137,12 @@ At top of `DailySalesTable.tsx`:
 ```tsx
 import { useEdit } from '@/components/edit-mode/EditContext'
 import {
-  DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
-  type DragEndEvent,
+  DndContext, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors,
+  useDroppable, type DragEndEvent, type DragOverEvent,
 } from '@dnd-kit/core'
 import {
   SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy,
+  arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 ```
@@ -1155,98 +1156,247 @@ const { isEditMode, draft, setDraft } = useEdit()
 
 - [ ] **Step 3: Sortable machine row wrapper**
 
-Define a helper component `SortableMachineRow` inside the same file:
+Define a helper component `SortableMachineRow` inside the same file. The drag handle is the sticky left cell only — clicking other cells must NOT trigger drag:
 ```tsx
-function SortableMachineRow({ deviceId, children }: { deviceId: string; children: React.ReactNode }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: deviceId })
+function SortableMachineRow({ deviceId, locationKey, children }: {
+  deviceId: string
+  locationKey: string
+  children: (handleProps: { setActivatorNodeRef: (el: HTMLElement | null) => void; listeners: any }) => React.ReactNode
+}) {
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
+    id: deviceId,
+    data: { locationKey, type: 'machine' },
+  })
   return (
     <tr
       ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
+      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 }}
       {...attributes}
-      {...listeners}
     >
-      {children}
+      {children({ setActivatorNodeRef, listeners })}
     </tr>
   )
 }
 ```
 
-When `!isEditMode`, render the existing `<tr>` as before. When `isEditMode`, wrap row content in `SortableMachineRow`. Use `m.deviceId` (you may need to expose device_id on machine rows — if it's not there, add it; see lib/aggregate types).
+When `!isEditMode`, render the existing `<tr>` as before. When `isEditMode`, wrap rows in `SortableMachineRow` and attach drag listeners only to the grip icon inside the first cell.
 
-- [ ] **Step 4: Inline rename in first column**
+- [ ] **Step 4: Droppable location group container**
 
-In the machine row, the sticky left cell currently renders `{m.machine}` (or similar name field). Replace with:
+To accept drops onto an empty location group (or onto the group header), declare each location group as droppable. Since `<tbody>` can't directly be `useDroppable`, attach the droppable to an invisible row at the END of each location group:
+```tsx
+function LocationDropTarget({ locationKey }: { locationKey: string }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `loc-drop:${locationKey}`,
+    data: { locationKey, type: 'location-end' },
+  })
+  return (
+    <tr ref={setNodeRef} className={isOver ? 'bg-accent/10' : ''}>
+      <td colSpan={999} className="h-1 p-0" />
+    </tr>
+  )
+}
+```
+
+Render `<LocationDropTarget locationKey={loc} />` at the end of each location group (after the last machine row of that location).
+
+- [ ] **Step 5: Inline rename in first cell + grip handle**
+
+Replace the sticky left cell of the machine row with:
 ```tsx
 {isEditMode ? (
-  <input
-    type="text"
-    defaultValue={m.machine}
-    onBlur={(e) => {
-      const newName = e.target.value.trim()
-      setDraft(prev => ({
-        ...prev,
-        machines: { ...prev.machines, [m.deviceId]: { ...(prev.machines[m.deviceId] ?? {}), name: newName } },
-      }))
-    }}
-    className="bg-background border border-accent rounded px-1.5 py-0.5 text-xs w-full"
-  />
+  ({ setActivatorNodeRef, listeners }) => (
+    <td className={`sticky left-0 z-10 bg-card ${stickyTd} text-foreground flex items-center gap-2`} style={stickyStyle}>
+      <span
+        ref={setActivatorNodeRef}
+        {...listeners}
+        className="cursor-grab text-muted hover:text-accent select-none px-1"
+        title="Drag to reorder or move between locations"
+      >
+        ⠿
+      </span>
+      <input
+        type="text"
+        defaultValue={m.machine}
+        onPointerDown={e => e.stopPropagation()}
+        onBlur={(e) => {
+          const newName = e.target.value.trim()
+          setDraft(prev => ({
+            ...prev,
+            machines: { ...prev.machines, [m.deviceId]: { ...(prev.machines[m.deviceId] ?? {}), name: newName } },
+          }))
+        }}
+        className="flex-1 bg-background border border-accent rounded px-1.5 py-0.5 text-xs w-full"
+      />
+    </td>
+  )
 ) : (
-  <span>{m.machine}</span>
+  <td className={`sticky left-0 z-10 bg-card ${stickyTd} text-foreground pl-5`} style={stickyStyle}>
+    {m.machine}
+  </td>
 )}
 ```
 
-- [ ] **Step 5: DnD wrapping**
+Notes:
+- `setActivatorNodeRef` + `listeners` are passed via the render-prop pattern from Step 3.
+- `onPointerDown` on the input stops drag activation so text selection works.
+- Use `m.deviceId` — if not yet exposed, expose it from `lib/aggregate.ts` (see step 7 below).
 
-In the parent table body, wrap each location's machine list in:
+- [ ] **Step 6: Single DndContext + nested SortableContext per location**
+
+In the table body, replace the existing locations-and-machines loop with:
 ```tsx
-<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleMachineDragEnd(e, locKey)}>
-  <SortableContext items={byLocation[loc].map(m => m.deviceId)} strategy={verticalListSortingStrategy}>
-    {byLocation[loc].map(m => (
-      <SortableMachineRow key={m.deviceId} deviceId={m.deviceId}>
-        {/* row cells */}
-      </SortableMachineRow>
-    ))}
-  </SortableContext>
-</DndContext>
-```
-Define `sensors` once: `const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }))`.
+const sensors = useSensors(
+  useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+  useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+)
 
-Define `handleMachineDragEnd`:
+const allMachinesByLocation = useMemo(() => {
+  // Build the working list from draft when in edit mode, else from props.
+  const src = isEditMode
+    ? machines.map(m => ({
+        ...m,
+        // override locationKey from draft if reassigned
+        location: draft.machines[m.deviceId]?.locationKey ?? m.location,
+      }))
+    : machines
+  const grouped: Record<string, typeof machines> = {}
+  const order: string[] = []
+  for (const m of src) {
+    if (!grouped[m.location]) { grouped[m.location] = []; order.push(m.location) }
+    grouped[m.location].push(m)
+  }
+  // Sort machines within each location by draft order, then name
+  for (const loc of order) {
+    grouped[loc].sort((a, b) => {
+      const ao = draft.machines[a.deviceId]?.order ?? Number.MAX_SAFE_INTEGER
+      const bo = draft.machines[b.deviceId]?.order ?? Number.MAX_SAFE_INTEGER
+      if (ao !== bo) return ao - bo
+      return a.machine.localeCompare(b.machine)
+    })
+  }
+  return { grouped, order }
+}, [machines, draft, isEditMode])
+
+// In the body markup:
+{isEditMode ? (
+  <DndContext
+    sensors={sensors}
+    collisionDetection={closestCorners}
+    onDragEnd={handleDragEnd}
+  >
+    {allMachinesByLocation.order.map(loc => (
+      <Fragment key={loc}>
+        {/* location header row (existing) */}
+        <SortableContext items={allMachinesByLocation.grouped[loc].map(m => m.deviceId)} strategy={verticalListSortingStrategy}>
+          {allMachinesByLocation.grouped[loc].map(m => (
+            <SortableMachineRow key={m.deviceId} deviceId={m.deviceId} locationKey={loc}>
+              {(handle) => (/* row cells using `handle` for the grip */)}
+            </SortableMachineRow>
+          ))}
+        </SortableContext>
+        <LocationDropTarget locationKey={loc} />
+      </Fragment>
+    ))}
+  </DndContext>
+) : (
+  /* existing non-edit rendering loop */
+)}
+```
+
+- [ ] **Step 7: Expose `deviceId` in machine rows from lib/aggregate.ts**
+
+The plan currently assumes `m.deviceId` exists on each `DailySalesMachineRow`. If it doesn't yet, add it. Open `lib/aggregate.ts`, find where `DailySalesMachineRow` is built, and add `deviceId: string`. Update `lib/types.ts` `DailySalesMachineRow` type:
 ```ts
-function handleMachineDragEnd(e: DragEndEvent, locKey: string) {
+export type DailySalesMachineRow = {
+  deviceId: string              // ← add this
+  machine: string
+  location: string
+  daily: Record<string, { qty: number; rev: number }>
+  totalQty: number
+  totalRev: number
+  dayActive: number
+  dayMet: number
+  kpiStatus: 'met' | 'below' | 'idle'
+}
+```
+
+If `deviceId` already exists, skip this step.
+
+- [ ] **Step 8: handleDragEnd — supports same-list reorder AND cross-list move**
+
+Add this function inside `DailySalesTable`:
+```tsx
+function handleDragEnd(e: DragEndEvent) {
   const { active, over } = e
   if (!over || active.id === over.id) return
-  const ids = byLocation[locKey].map(m => m.deviceId)
-  const oldIdx = ids.indexOf(active.id as string)
-  const newIdx = ids.indexOf(over.id as string)
-  if (oldIdx < 0 || newIdx < 0) return
-  const reordered = [...ids]
-  reordered.splice(oldIdx, 1)
-  reordered.splice(newIdx, 0, active.id as string)
+
+  const activeData = active.data.current as { locationKey?: string; type?: string } | undefined
+  const overData = over.data.current as { locationKey?: string; type?: string } | undefined
+  if (!activeData?.locationKey) return
+
+  const sourceLoc = activeData.locationKey
+  const isDropOnLocationEnd = overData?.type === 'location-end'
+  const targetLoc = isDropOnLocationEnd ? overData!.locationKey! : (overData?.locationKey ?? sourceLoc)
+
+  const sourceIds = allMachinesByLocation.grouped[sourceLoc].map(m => m.deviceId)
+  const targetIds = sourceLoc === targetLoc ? sourceIds : allMachinesByLocation.grouped[targetLoc].map(m => m.deviceId)
+
+  const fromIdx = sourceIds.indexOf(active.id as string)
+  let toIdx: number
+  if (isDropOnLocationEnd) {
+    toIdx = targetIds.length  // append to end
+  } else {
+    toIdx = targetIds.indexOf(over.id as string)
+    if (toIdx < 0) return
+  }
+  if (fromIdx < 0) return
+
   setDraft(prev => {
     const nextMachines = { ...prev.machines }
-    reordered.forEach((id, i) => {
-      nextMachines[id] = { ...(nextMachines[id] ?? {}), order: i, locationKey: locKey }
-    })
+
+    if (sourceLoc === targetLoc) {
+      // Same-list reorder
+      const reordered = arrayMove(sourceIds, fromIdx, toIdx)
+      reordered.forEach((id, i) => {
+        nextMachines[id] = { ...(nextMachines[id] ?? {}), order: i, locationKey: sourceLoc }
+      })
+    } else {
+      // Cross-list move
+      const newSource = [...sourceIds]
+      newSource.splice(fromIdx, 1)
+      const newTarget = [...targetIds]
+      newTarget.splice(toIdx, 0, active.id as string)
+
+      newSource.forEach((id, i) => {
+        nextMachines[id] = { ...(nextMachines[id] ?? {}), order: i, locationKey: sourceLoc }
+      })
+      newTarget.forEach((id, i) => {
+        nextMachines[id] = { ...(nextMachines[id] ?? {}), order: i, locationKey: targetLoc }
+      })
+    }
+
     return { ...prev, machines: nextMachines }
   })
 }
 ```
 
-- [ ] **Step 6: Smoke test**
+Note `arrayMove` import was added in Step 1.
 
-Reload `/sales-report`. Enter edit mode. Expected:
-- Machine name cells are inputs
-- Cursor on hover shows grab/grabbing
-- Drag a machine row — it reorders within the location
-- Click Save → page refreshes — new order persists across reload
+- [ ] **Step 9: Smoke test (localhost)**
 
-- [ ] **Step 7: Commit**
+1. Reload `/sales-report`, enter edit mode
+2. Machine name cells become editable inputs with grip handles
+3. Drag a machine **within the same location** — order changes
+4. Drag a machine **to a different location's group** (drop on another machine OR on the thin drop bar at end of that group's rows) — machine moves to target location
+5. Click Save → reload → both location AND order persist
+6. Open Dashboard → renamed/moved machine appears under its new location group
+
+- [ ] **Step 10: Commit**
 
 ```bash
-git add components/executive-summary/DailySalesTable.tsx
-git commit -m "feat(sales-report): inline rename + intra-location drag-drop in edit mode"
+git add components/executive-summary/DailySalesTable.tsx lib/aggregate.ts lib/types.ts
+git commit -m "feat(sales-report): inline rename + cross-location drag-drop in edit mode"
 ```
 
 ---
@@ -1432,7 +1582,5 @@ If all green, the feature is shipped. Report results to the user.
 - ✅ Rollout (Task 18, 19)
 
 **Open gaps:**
-- Inter-location drag (moving a machine from Airport→Hospital) is **not** implemented in Task 16. Intra-location reordering only. Adding cross-list move requires a second `SortableContext` strategy and is a follow-up if user needs it. Spec mentioned both — flagging here so the executing engineer asks before adding.
-- Location header reordering is also a follow-up — Task 16 only covers machine rows. Adding location header DnD is a sibling task.
-
-If the user wants those in v1, expand Task 16 into 16a/16b/16c. Otherwise, ship the bite-sized scope and add cross-list move as a v1.1 task.
+- Location header reordering (drag the location group itself to change Airport↔Hospital↔University order) is still a v1.1 follow-up. Task 16 covers machine rows (same-location reorder AND cross-location move) but does not let the user drag an entire location group's position. Spec listed location-order edit; if user needs it, add a parallel Task 16b with a top-level `SortableContext` over `locations.order`.
+- Per-machine field "label" for location is editable via the `locations[key].label` schema but no UI exists yet to edit it. Add a small "Rename location" affordance on the location header in v1.1 if needed.
