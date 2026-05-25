@@ -101,3 +101,22 @@ export type FilterState = {
   dateTo: string
   currency: Currency
 }
+
+// ─── Overrides layer ──────────────────────────────────────────────
+export type MachineOverride = {
+  name?: string
+  locationKey?: string
+  order?: number
+}
+
+export type LocationOverride = {
+  label?: string
+  order?: number
+}
+
+export type Overrides = {
+  version: 1
+  updatedAt: string  // ISO timestamp
+  machines: Record<string, MachineOverride>     // keyed by device_id
+  locations: Record<string, LocationOverride>   // keyed by locationKey
+}
