@@ -53,6 +53,7 @@ export type DailySalesEntry = { qty: number; rev: number }
 export type KpiStatus = 'met' | 'below' | 'idle'
 
 export type DailySalesMachineRow = {
+  deviceId: string
   location: string
   machine: string
   daily: Record<string, DailySalesEntry>

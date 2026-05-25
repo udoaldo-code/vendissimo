@@ -156,15 +156,18 @@ export function aggregateTransactions(
     .map(([date, revenue]) => ({ date, revenue }))
     .sort((a, b) => parseTransactionDate(a.date).getTime() - parseTransactionDate(b.date).getTime())
 
-  // Daily Sales Per Machine (pivot: machine × date)
+  // Daily Sales Per Machine (pivot: machine × date), keyed by deviceId so
+  // renamed machines do not collide and overrides flow through cleanly.
   const target = getKpiTarget()
   const machineMap: Record<string, DailySalesMachineRow> = {}
   for (const t of transactions) {
-    if (!machineMap[t.machine]) machineMap[t.machine] = {
-      location: t.location, machine: t.machine, daily: {}, totalQty: 0, totalRev: 0,
+    const key = t.deviceId || t.machine
+    if (!machineMap[key]) machineMap[key] = {
+      deviceId: t.deviceId || '', location: t.location, machine: t.machine,
+      daily: {}, totalQty: 0, totalRev: 0,
       dayActive: 0, dayMet: 0, kpiStatus: 'idle',
     }
-    const row = machineMap[t.machine]
+    const row = machineMap[key]
     if (!row.daily[t.date]) row.daily[t.date] = { qty: 0, rev: 0 }
     row.daily[t.date].qty += t.qty
     row.daily[t.date].rev += t.unitPrice * t.qty

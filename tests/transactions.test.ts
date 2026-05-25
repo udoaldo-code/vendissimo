@@ -24,6 +24,7 @@ describe('rowToTransaction', () => {
 
   it('maps a USD row with correct field shapes', () => {
     expect(rowToTransaction(row, { '9fl9g4hgn0f243c': 'KHMER House' })).toEqual({
+      deviceId: '9fl9g4hgn0f243c',
       machine: 'V1- KHMER HOUSE',
       location: 'KHMER House',
       product: 'BACCHUS',
