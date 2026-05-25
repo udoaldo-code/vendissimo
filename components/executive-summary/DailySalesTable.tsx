@@ -420,7 +420,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                     </th>
                   ))}
                   <th className="py-1.5 px-3 text-center text-accent-pink font-bold text-sm border-b border-border border-l-2 border-accent-pink/40 whitespace-nowrap min-w-[110px]">
-                    Week
+                    {wk.label}
                   </th>
                 </Fragment>
               ))}
@@ -439,7 +439,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                     </th>
                   ))}
                   <th className="py-1 px-3 text-center text-accent-pink font-semibold text-sm border-b border-border border-l-2 border-accent-pink/40 whitespace-nowrap">
-                    {wk.label}
+                    KPI/Target
                   </th>
                 </Fragment>
               ))}
@@ -456,7 +456,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
                       <th className="py-1 px-2 text-right text-muted font-medium border-b border-border whitespace-nowrap">Rev</th>
                     </Fragment>
                   ))}
-                  <th className="py-1 px-3 text-center text-accent-pink font-bold text-sm border-b border-border border-l-2 border-accent-pink/40 whitespace-nowrap">Qty</th>
+                  <th className="py-1 px-3 text-center text-accent-pink font-bold text-sm border-b border-border border-l-2 border-accent-pink/40 whitespace-nowrap">QTY</th>
                 </Fragment>
               ))}
               <th className="py-1 px-2 text-right text-accent font-semibold border-b border-border border-l border-border whitespace-nowrap">Qty</th>
