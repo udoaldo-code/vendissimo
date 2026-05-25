@@ -1,17 +1,21 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import type { Currency, Transaction } from '@/lib/types'
+import type { Currency, Overrides, Transaction } from '@/lib/types'
 import { filterByDateRange, aggregateTransactions } from '@/lib/aggregate'
 import { DateFilter, type DatePreset } from '@/components/executive-summary/DateFilter'
 import { DailySalesTable } from '@/components/executive-summary/DailySalesTable'
+import { EditProvider } from '@/components/edit-mode/EditContext'
+import { EditModeToggle } from '@/components/edit-mode/EditModeToggle'
+import { EditBanner } from '@/components/edit-mode/EditBanner'
 
 type Props = {
   transactions: Transaction[]
   categoryMap: Record<string, string>
+  overrides: Overrides
 }
 
-export function SalesReportClient({ transactions, categoryMap }: Props) {
+export function SalesReportClient({ transactions, categoryMap, overrides }: Props) {
   const currency: Currency = 'USD'
   const [preset, setPreset] = useState<DatePreset>('all')
   const [dateFrom, setDateFrom] = useState('')
@@ -36,17 +40,24 @@ export function SalesReportClient({ transactions, categoryMap }: Props) {
   const hasData = dailySales.dates.length > 0 && dailySales.machines.length > 0
 
   return (
-    <div className="flex flex-col gap-4">
-      <DateFilter preset={preset} dateFrom={dateFrom} dateTo={dateTo} onChange={handleChange} />
-
-      {hasData ? (
-        <DailySalesTable dailySales={dailySales} preset={preset} />
-      ) : (
-        <div className="bg-card border border-border rounded-lg p-5 shadow-sm">
-          <p className="text-foreground text-sm font-semibold mb-2">No sales data for the selected period</p>
-          <p className="text-muted text-sm">Pick a different period or refresh the data.</p>
+    <EditProvider>
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <DateFilter preset={preset} dateFrom={dateFrom} dateTo={dateTo} onChange={handleChange} />
+          <EditModeToggle initialOverrides={overrides} />
         </div>
-      )}
-    </div>
+
+        <EditBanner />
+
+        {hasData ? (
+          <DailySalesTable dailySales={dailySales} preset={preset} />
+        ) : (
+          <div className="bg-card border border-border rounded-lg p-5 shadow-sm">
+            <p className="text-foreground text-sm font-semibold mb-2">No sales data for the selected period</p>
+            <p className="text-muted text-sm">Pick a different period or refresh the data.</p>
+          </div>
+        )}
+      </div>
+    </EditProvider>
   )
 }

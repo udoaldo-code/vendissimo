@@ -1,6 +1,7 @@
 import { fetchTransactions, getLastSyncTime, getLastCronTime, getFxInfo } from '@/lib/clickhouse'
 import { formatLastSync, formatFxRate } from '@/lib/transactions'
 import { PRODUCT_CATEGORIES } from '@/lib/categories'
+import { getOverrides } from '@/lib/overrides'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { RefreshButton } from '@/components/RefreshButton'
 import { SalesReportClient } from '@/components/sales-report/SalesReportClient'
@@ -9,6 +10,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function SalesReportPage() {
   const transactions = await fetchTransactions()
+  const overrides = await getOverrides()
   const lastSync = getLastSyncTime()
   const lastCron = getLastCronTime()
   const fx = getFxInfo()
@@ -25,7 +27,7 @@ export default async function SalesReportPage() {
           <RefreshButton />
         </div>
       </div>
-      <SalesReportClient transactions={transactions} categoryMap={PRODUCT_CATEGORIES} />
+      <SalesReportClient transactions={transactions} categoryMap={PRODUCT_CATEGORIES} overrides={overrides} />
     </div>
   )
 }
