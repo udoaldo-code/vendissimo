@@ -1,4 +1,4 @@
-import type { Currency, Transaction } from './types'
+import type { Currency, Overrides, Transaction } from './types'
 
 /** Cutoff: rows whose sales_time is < this string are USD; >= is KHR. */
 export const CURRENCY_CUTOFF = '2026-05-19'
@@ -37,6 +37,7 @@ export function rowToTransaction(
   locations: Record<string, string>,
   canonicalNames: Record<string, string> = {},
   usdPerKhr: number = 1 / 4100,
+  overrides?: Overrides,
 ): Transaction {
   const salesTime = row.sales_time ?? ''
   const rawPrice = row.sales_amount != null ? parseFloat(row.sales_amount) : 0
@@ -44,9 +45,21 @@ export function rowToTransaction(
   const originalCurrency = rowCurrency(salesTime)
   const usdPrice = originalCurrency === 'KHR' ? safePrice * usdPerKhr : safePrice
   const id = row.device_id ?? ''
+
+  const chName = (id && canonicalNames[id]) || row.device_name || ''
+  const overrideMachine = overrides?.machines[id]
+  const machine = overrideMachine?.name ?? chName
+
+  const staticLoc = (id && locations[id]) || ''
+  const overrideKey = overrideMachine?.locationKey
+  const locationLabel = overrideKey
+    ? (overrides?.locations[overrideKey]?.label ?? overrideKey)
+    : (staticLoc || 'Unknown')
+
   return {
-    machine: (id && canonicalNames[id]) || row.device_name || '',
-    location: (id && locations[id]) || 'Unknown',
+    deviceId: id,
+    machine,
+    location: locationLabel,
     product: row.product_name ?? '',
     unitPrice: usdPrice,
     qty: 1,

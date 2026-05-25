@@ -3,6 +3,7 @@ import type { Transaction } from './types'
 import { rowToTransaction, buildCanonicalNames, type CHRow } from './transactions'
 import { DEVICE_LOCATIONS } from './locations'
 import { getKhrToUsd } from './fx'
+import { getOverrides } from './overrides'
 
 const CACHE_TTL_MS = 5 * 60_000 // 5 minutes — short enough that new sales appear quickly on every page
 
@@ -38,9 +39,9 @@ export async function fetchTransactions(): Promise<Transaction[]> {
   if (cache && Date.now() - cache.at < CACHE_TTL_MS) {
     return cache.data
   }
-  // Fetch FX rate BEFORE opening CH client so a slow FX response cannot
-  // idle out the CH connection between its two queries.
-  const fxRate = await getKhrToUsd()
+  // Fetch FX rate + overrides BEFORE opening CH client so slow upstreams
+  // cannot idle out the CH connection between its two queries.
+  const [fxRate, overrides] = await Promise.all([getKhrToUsd(), getOverrides()])
 
   const ch = client()
   try {
@@ -64,7 +65,7 @@ export async function fetchTransactions(): Promise<Transaction[]> {
     const lastCron = cronRows[0]?.s ?? null
 
     const canonicalNames = buildCanonicalNames(rows)
-    const data = rows.map(r => rowToTransaction(r, DEVICE_LOCATIONS, canonicalNames, fxRate.usdPerKhr))
+    const data = rows.map(r => rowToTransaction(r, DEVICE_LOCATIONS, canonicalNames, fxRate.usdPerKhr, overrides))
     let lastSync: string | null = null
     for (const r of rows) {
       if (r.sales_time && (!lastSync || r.sales_time > lastSync)) lastSync = r.sales_time

@@ -82,6 +82,7 @@ export type ExecSummaryData = {
 }
 
 export type Transaction = {
+  deviceId: string
   machine: string
   location: string
   product: string

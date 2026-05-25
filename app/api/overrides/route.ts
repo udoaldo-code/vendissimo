@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 const MachineOverrideSchema = z.object({
   name: z.string().max(80).optional(),
-  locationKey: z.string().regex(/^[a-z0-9_-]{1,32}$/).optional(),
+  locationKey: z.string().min(1).max(60).optional(),
   order: z.number().int().min(0).max(999).optional(),
 })
 
@@ -24,7 +24,7 @@ const OverridesSchema = z.object({
     (v) => Object.keys(v).length <= 50,
     { message: 'max 50 machines' },
   ),
-  locations: z.record(z.string().regex(/^[a-z0-9_-]{1,32}$/), LocationOverrideSchema).refine(
+  locations: z.record(z.string().min(1).max(60), LocationOverrideSchema).refine(
     (v) => Object.keys(v).length <= 20,
     { message: 'max 20 locations' },
   ),
