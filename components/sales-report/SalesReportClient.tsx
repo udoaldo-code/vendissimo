@@ -5,6 +5,7 @@ import type { Currency, Overrides, Transaction } from '@/lib/types'
 import { filterByDateRange, aggregateTransactions } from '@/lib/aggregate'
 import { DateFilter, type DatePreset } from '@/components/executive-summary/DateFilter'
 import { DailySalesTable } from '@/components/executive-summary/DailySalesTable'
+import { WeeklySummary } from '@/components/executive-summary/WeeklySummary'
 import { EditProvider } from '@/components/edit-mode/EditContext'
 import { EditModeToggle } from '@/components/edit-mode/EditModeToggle'
 import { EditBanner } from '@/components/edit-mode/EditBanner'
@@ -52,7 +53,10 @@ export function SalesReportClient({ transactions, categoryMap, overrides }: Prop
         <WeeksEditor />
 
         {hasData ? (
-          <DailySalesTable dailySales={dailySales} preset={preset} overrides={overrides} />
+          <>
+            <DailySalesTable dailySales={dailySales} preset={preset} overrides={overrides} />
+            <WeeklySummary dailySales={dailySales} overrides={overrides} preset={preset} />
+          </>
         ) : (
           <div className="bg-card border border-border rounded-lg p-5 shadow-sm">
             <p className="text-foreground text-sm font-semibold mb-2">No sales data for the selected period</p>

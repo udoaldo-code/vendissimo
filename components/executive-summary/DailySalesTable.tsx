@@ -3,7 +3,7 @@
 import { Fragment, useMemo } from 'react'
 import { useCurrency } from '@/components/currency-context'
 import { formatMoney } from '@/lib/transactions'
-import type { DailySalesData, DailySalesMachineRow, Overrides, WeekRange } from '@/lib/types'
+import type { DailySalesData, DailySalesMachineRow, Overrides } from '@/lib/types'
 import type { DatePreset } from './DateFilter'
 import { parseTransactionDate } from '@/lib/filter-utils'
 import { useEdit } from '@/components/edit-mode/EditContext'
@@ -29,59 +29,7 @@ function fmtDateHeader(dateStr: string): { day: string; date: string } {
   return { day, date: `${dd}-${mon}-${yy}` }
 }
 
-function weekStartKey(dateStr: string): string {
-  const d = parseTransactionDate(dateStr)
-  const dow = d.getDay()
-  const offsetToMon = dow === 0 ? -6 : 1 - dow
-  const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() + offsetToMon)
-  return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`
-}
-
-type WeekBucket = { key: string; label: string; dates: string[]; target?: number }
-
-function weekOfMonthLabel(mondayKey: string): string {
-  const [y, m, d] = mondayKey.split('-').map(Number)
-  const monday = new Date(y, m - 1, d)
-  const weekNum = Math.ceil(monday.getDate() / 7)
-  const monthName = monday.toLocaleString('en-US', { month: 'short' })
-  return `Week ${weekNum} ${monthName}`
-}
-
-// Monday-anchored auto bucketing (fallback when no override weeks).
-function buildAutoWeekBuckets(dates: string[]): WeekBucket[] {
-  const grouped: Record<string, string[]> = {}
-  const order: string[] = []
-  for (const d of dates) {
-    const key = weekStartKey(d)
-    if (!grouped[key]) { grouped[key] = []; order.push(key) }
-    grouped[key].push(d)
-  }
-  return order.map(key => ({ key, label: weekOfMonthLabel(key), dates: grouped[key] }))
-}
-
-// Convert "M/D/YYYY" -> "YYYY-MM-DD" for ISO comparison.
-function toIsoDate(mdY: string): string {
-  const d = parseTransactionDate(mdY)
-  if (isNaN(d.getTime())) return ''
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
-
-// Build buckets from user-defined week ranges in overrides.
-function buildOverrideWeekBuckets(
-  dates: string[],
-  weeks: Array<{ id: string; startDate: string; endDate: string; label?: string; targetOverride?: number }>,
-): WeekBucket[] {
-  // dates are "M/D/YYYY"; convert each to ISO for range checks.
-  const isoDates = dates.map(d => ({ orig: d, iso: toIsoDate(d) }))
-  return weeks
-    .slice()
-    .sort((a, b) => a.startDate.localeCompare(b.startDate))
-    .map(w => {
-      const ds = isoDates.filter(x => x.iso >= w.startDate && x.iso <= w.endDate).map(x => x.orig)
-      const label = w.label ?? `${w.startDate.slice(5)} → ${w.endDate.slice(5)}`
-      return { key: w.id, label, dates: ds, target: w.targetOverride }
-    })
-}
+// Week bucketing helpers moved to lib/week-buckets.ts (used by WeeklySummary).
 
 const LOCATION_COLORS: Record<string, string> = {
   Airport: '#dc2626',
@@ -125,17 +73,8 @@ export function DailySalesTable({ dailySales, preset, overrides }: Props) {
   const { dates, machines, locationTotals, grandTotal, kpiTarget } = dailySales
   const { isEditMode, draft, setDraft } = useEdit()
 
-  // Per-bucket target: explicit override OR auto = kpiTarget × days_in_bucket.
-  function bucketTarget(wk: WeekBucket): number {
-    if (typeof wk.target === 'number') return wk.target
-    return kpiTarget * wk.dates.length
-  }
-
   function cellTint(qty: number): string {
     return qty > 0 && qty < kpiTarget ? 'bg-danger/15' : ''
-  }
-  function weekTint(qty: number, target: number): string {
-    return qty > 0 && qty < target ? 'bg-danger/15' : ''
   }
   function cellTitle(qty: number, dateLabel: string): string {
     if (qty <= 0) return `${dateLabel} — no sale`
@@ -143,17 +82,8 @@ export function DailySalesTable({ dailySales, preset, overrides }: Props) {
       ? `${dateLabel} — Met (${qty} ≥ ${kpiTarget})`
       : `${dateLabel} — Below (${qty} < ${kpiTarget})`
   }
-  function weekTitle(qty: number, weekLabel: string, target: number): string {
-    if (qty <= 0) return `${weekLabel} — no sale`
-    return qty >= target
-      ? `${weekLabel} — Met (${qty} ≥ ${target})`
-      : `${weekLabel} — Below (${qty} < ${target})`
-  }
 
   const displayDates = preset === 'all' ? dates.slice(-14) : dates.slice()
-
-  // Week bucketing: use override weeks if defined, else Monday-auto.
-  const activeWeeks = isEditMode ? (draft.weeks ?? []) : (overrides.weeks ?? [])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -185,10 +115,6 @@ export function DailySalesTable({ dailySales, preset, overrides }: Props) {
 
   if (displayDates.length === 0 || machines.length === 0) return null
 
-  const weekBuckets: WeekBucket[] = activeWeeks.length > 0
-    ? buildOverrideWeekBuckets(displayDates, activeWeeks)
-    : buildAutoWeekBuckets(displayDates)
-
   const tdBase = 'py-1.5 px-2 text-xs whitespace-nowrap border-b border-border'
   const numCell = `${tdBase} text-right tabular-nums`
   const stickyTd = 'py-1.5 px-2 text-xs border-b border-border min-w-[90px] md:min-w-[150px] max-w-[160px] md:max-w-[260px] break-words'
@@ -197,12 +123,6 @@ export function DailySalesTable({ dailySales, preset, overrides }: Props) {
   function entry(daily: Record<string, { qty: number; rev: number }>, date: string) {
     const e = daily[date]
     return e ?? { qty: 0, rev: 0 }
-  }
-
-  function weekTotalQty(daily: Record<string, { qty: number; rev: number }>, weekDates: string[]) {
-    let qty = 0
-    for (const d of weekDates) qty += daily[d]?.qty ?? 0
-    return qty
   }
 
   function handleDragEnd(e: DragEndEvent) {
@@ -296,59 +216,36 @@ export function DailySalesTable({ dailySales, preset, overrides }: Props) {
       ) : (
         <td className={`sticky left-0 z-10 bg-card ${stickyTd} text-foreground pl-5`} style={stickyStyle}>{m.machine}</td>
       )}
-      {weekBuckets.map(wk => {
-        const wkQty = weekTotalQty(m.daily, wk.dates)
-        const wkTarget = bucketTarget(wk)
-        const wkTintCls = weekTint(wkQty, wkTarget)
-        const wkTip = weekTitle(wkQty, wk.label, wkTarget)
-        const wkDot = wkQty <= 0 ? 'bg-muted' : wkQty >= wkTarget ? 'bg-emerald-400' : 'bg-danger'
+      {displayDates.map(d => {
+        const e = entry(m.daily, d)
+        const tint = cellTint(e.qty)
+        const title = cellTitle(e.qty, fmtDateHeader(d).date)
+        const status: 'met' | 'below' | 'idle' =
+          e.qty <= 0 ? 'idle' : e.qty >= kpiTarget ? 'met' : 'below'
+        const dotClass =
+          status === 'met' ? 'bg-emerald-400'
+          : status === 'below' ? 'bg-danger'
+          : 'bg-muted'
+        const tooltip = (
+          <div
+            role="tooltip"
+            className="pointer-events-none absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-1 px-2.5 py-1.5 rounded-md bg-card border border-border shadow-lg text-foreground text-xs whitespace-nowrap opacity-0 scale-95 group-hover/cell:opacity-100 group-hover/cell:scale-100 transition duration-100"
+          >
+            <div className="flex items-center gap-1.5">
+              <span className={`inline-block w-1.5 h-1.5 rounded-full ${dotClass}`} />
+              <span>{title}</span>
+            </div>
+          </div>
+        )
         return (
-          <Fragment key={wk.key}>
-            {wk.dates.map(d => {
-              const e = entry(m.daily, d)
-              const tint = cellTint(e.qty)
-              const title = cellTitle(e.qty, fmtDateHeader(d).date)
-              const status: 'met' | 'below' | 'idle' =
-                e.qty <= 0 ? 'idle' : e.qty >= kpiTarget ? 'met' : 'below'
-              const dotClass =
-                status === 'met' ? 'bg-emerald-400'
-                : status === 'below' ? 'bg-danger'
-                : 'bg-muted'
-              const tooltip = (
-                <div
-                  role="tooltip"
-                  className="pointer-events-none absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-1 px-2.5 py-1.5 rounded-md bg-card border border-border shadow-lg text-foreground text-xs whitespace-nowrap opacity-0 scale-95 group-hover/cell:opacity-100 group-hover/cell:scale-100 transition duration-100"
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span className={`inline-block w-1.5 h-1.5 rounded-full ${dotClass}`} />
-                    <span>{title}</span>
-                  </div>
-                </div>
-              )
-              return (
-                <Fragment key={d}>
-                  <td className={`${numCell} text-muted-strong border-l border-border cursor-help relative group/cell ${tint}`}>
-                    {e.qty}
-                    {tooltip}
-                  </td>
-                  <td className={`${numCell} text-muted-strong cursor-help relative group/cell ${tint}`}>
-                    {formatMoney(e.rev, currency)}
-                    {tooltip}
-                  </td>
-                </Fragment>
-              )
-            })}
-            <td className={`py-1.5 px-3 text-center text-sm font-bold tabular-nums whitespace-nowrap border-b border-border border-l-2 border-accent-pink/40 text-foreground cursor-help relative group/cell ${wkTintCls}`}>
-              {wkQty}
-              <div
-                role="tooltip"
-                className="pointer-events-none absolute z-50 bottom-full right-0 mb-1 px-2.5 py-1.5 rounded-md bg-card border border-border shadow-lg text-foreground text-xs whitespace-nowrap opacity-0 scale-95 group-hover/cell:opacity-100 group-hover/cell:scale-100 transition duration-100"
-              >
-                <div className="flex items-center gap-1.5">
-                  <span className={`inline-block w-1.5 h-1.5 rounded-full ${wkDot}`} />
-                  <span>{wkTip}</span>
-                </div>
-              </div>
+          <Fragment key={d}>
+            <td className={`${numCell} text-muted-strong border-l border-border cursor-help relative group/cell ${tint}`}>
+              {e.qty}
+              {tooltip}
+            </td>
+            <td className={`${numCell} text-muted-strong cursor-help relative group/cell ${tint}`}>
+              {formatMoney(e.rev, currency)}
+              {tooltip}
             </td>
           </Fragment>
         )
@@ -380,22 +277,12 @@ export function DailySalesTable({ dailySales, preset, overrides }: Props) {
               locationDisplay(loc)
             )}
           </td>
-          {weekBuckets.map(wk => {
-            const wkQty = weekTotalQty(lt.daily, wk.dates)
+          {displayDates.map(d => {
+            const e = entry(lt.daily, d)
             return (
-              <Fragment key={wk.key}>
-                {wk.dates.map(d => {
-                  const e = entry(lt.daily, d)
-                  return (
-                    <Fragment key={d}>
-                      <td className={`${numCell} border-l border-border font-medium`} style={{ color }}>{e.qty}</td>
-                      <td className={`${numCell} font-medium`} style={{ color }}>{formatMoney(e.rev, currency)}</td>
-                    </Fragment>
-                  )
-                })}
-                <td className={`py-1.5 px-3 text-center text-sm font-bold tabular-nums whitespace-nowrap border-b border-border border-l-2 border-accent-pink/40`} style={{ color }}>
-                  {wkQty}
-                </td>
+              <Fragment key={d}>
+                <td className={`${numCell} border-l border-border font-medium`} style={{ color }}>{e.qty}</td>
+                <td className={`${numCell} font-medium`} style={{ color }}>{formatMoney(e.rev, currency)}</td>
               </Fragment>
             )
           })}
@@ -449,17 +336,10 @@ export function DailySalesTable({ dailySales, preset, overrides }: Props) {
               <th className={`sticky left-0 z-10 bg-surface-hover text-left text-muted font-medium ${stickyTd}`} style={stickyStyle}>
                 Name of Machine
               </th>
-              {weekBuckets.map(wk => (
-                <Fragment key={wk.key}>
-                  {wk.dates.map(d => (
-                    <th key={d} colSpan={2} className="py-1.5 px-2 text-center text-muted-strong font-medium border-b border-border border-l border-border">
-                      {fmtDateHeader(d).day}
-                    </th>
-                  ))}
-                  <th className="py-1.5 px-3 text-center text-accent-pink font-bold text-sm border-b border-border border-l-2 border-accent-pink/40 whitespace-nowrap min-w-[110px]">
-                    {wk.label}
-                  </th>
-                </Fragment>
+              {displayDates.map(d => (
+                <th key={d} colSpan={2} className="py-1.5 px-2 text-center text-muted-strong font-medium border-b border-border border-l border-border">
+                  {fmtDateHeader(d).day}
+                </th>
               ))}
               <th colSpan={2} className="py-1.5 px-2 text-center text-accent font-semibold border-b border-border border-l border-border">
                 TOTAL
@@ -468,32 +348,20 @@ export function DailySalesTable({ dailySales, preset, overrides }: Props) {
             </tr>
             <tr className="bg-surface-hover">
               <th className="sticky left-0 z-10 bg-surface-hover border-b border-border" style={stickyStyle} />
-              {weekBuckets.map(wk => (
-                <Fragment key={wk.key}>
-                  {wk.dates.map(d => (
-                    <th key={d} colSpan={2} className="py-1 px-2 text-center text-muted-strong font-normal border-b border-border border-l border-border">
-                      {fmtDateHeader(d).date}
-                    </th>
-                  ))}
-                  <th className="py-1 px-3 text-center text-accent-pink font-semibold text-sm border-b border-border border-l-2 border-accent-pink/40 whitespace-nowrap">
-                    KPI/Target
-                  </th>
-                </Fragment>
+              {displayDates.map(d => (
+                <th key={d} colSpan={2} className="py-1 px-2 text-center text-muted-strong font-normal border-b border-border border-l border-border">
+                  {fmtDateHeader(d).date}
+                </th>
               ))}
               <th colSpan={2} className="border-b border-border border-l border-border" />
               <th className="border-b border-border" />
             </tr>
             <tr className="bg-surface-hover">
               <th className="sticky left-0 z-10 bg-surface-hover border-b border-border" style={stickyStyle} />
-              {weekBuckets.map(wk => (
-                <Fragment key={wk.key}>
-                  {wk.dates.map(d => (
-                    <Fragment key={d}>
-                      <th className="py-1 px-2 text-right text-muted font-medium border-b border-border border-l border-border whitespace-nowrap">Qty</th>
-                      <th className="py-1 px-2 text-right text-muted font-medium border-b border-border whitespace-nowrap">Rev</th>
-                    </Fragment>
-                  ))}
-                  <th className="py-1 px-3 text-center text-accent-pink font-bold text-sm border-b border-border border-l-2 border-accent-pink/40 whitespace-nowrap">QTY</th>
+              {displayDates.map(d => (
+                <Fragment key={d}>
+                  <th className="py-1 px-2 text-right text-muted font-medium border-b border-border border-l border-border whitespace-nowrap">Qty</th>
+                  <th className="py-1 px-2 text-right text-muted font-medium border-b border-border whitespace-nowrap">Rev</th>
                 </Fragment>
               ))}
               <th className="py-1 px-2 text-right text-accent font-semibold border-b border-border border-l border-border whitespace-nowrap">Qty</th>
@@ -514,25 +382,15 @@ export function DailySalesTable({ dailySales, preset, overrides }: Props) {
               <td className={`sticky left-0 z-10 bg-[#1e1b4b] ${stickyTd} text-white font-bold`} style={{ boxShadow: '2px 0 4px rgba(0,0,0,0.2)' }}>
                 Grand Total
               </td>
-              {weekBuckets.map(wk => {
-                const wkQty = weekTotalQty(grandTotal.daily, wk.dates)
+              {displayDates.map(d => {
+                const e = entry(grandTotal.daily, d)
                 return (
-                  <Fragment key={wk.key}>
-                    {wk.dates.map(d => {
-                      const e = entry(grandTotal.daily, d)
-                      return (
-                        <Fragment key={d}>
-                          <td className="py-2 px-2 text-right text-white font-medium text-xs tabular-nums whitespace-nowrap border-l border-white/20">
-                            {e.qty}
-                          </td>
-                          <td className="py-2 px-2 text-right text-white font-medium text-xs tabular-nums whitespace-nowrap">
-                            {formatMoney(e.rev, currency)}
-                          </td>
-                        </Fragment>
-                      )
-                    })}
-                    <td className="py-2 px-3 text-center text-[#a78bfa] font-bold text-sm tabular-nums whitespace-nowrap border-l-2 border-accent-pink/40">
-                      {wkQty}
+                  <Fragment key={d}>
+                    <td className="py-2 px-2 text-right text-white font-medium text-xs tabular-nums whitespace-nowrap border-l border-white/20">
+                      {e.qty}
+                    </td>
+                    <td className="py-2 px-2 text-right text-white font-medium text-xs tabular-nums whitespace-nowrap">
+                      {formatMoney(e.rev, currency)}
                     </td>
                   </Fragment>
                 )
