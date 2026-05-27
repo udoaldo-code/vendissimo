@@ -9,7 +9,6 @@ import { WeeklySummary } from '@/components/executive-summary/WeeklySummary'
 import { EditProvider } from '@/components/edit-mode/EditContext'
 import { EditModeToggle } from '@/components/edit-mode/EditModeToggle'
 import { EditBanner } from '@/components/edit-mode/EditBanner'
-import { WeeksEditor } from '@/components/edit-mode/WeeksEditor'
 
 type Props = {
   transactions: Transaction[]
@@ -50,7 +49,6 @@ export function SalesReportClient({ transactions, categoryMap, overrides }: Prop
         </div>
 
         <EditBanner />
-        <WeeksEditor />
 
         {hasData ? (
           <>
