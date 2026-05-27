@@ -116,9 +116,18 @@ export type LocationOverride = {
   order?: number
 }
 
+export type WeekRange = {
+  id: string
+  startDate: string  // YYYY-MM-DD
+  endDate: string    // YYYY-MM-DD
+  label?: string     // optional, auto-computed if absent
+  targetOverride?: number  // optional, auto = kpiTarget × days if absent
+}
+
 export type Overrides = {
   version: 1
   updatedAt: string  // ISO timestamp
   machines: Record<string, MachineOverride>     // keyed by device_id
   locations: Record<string, LocationOverride>   // keyed by locationKey
+  weeks?: WeekRange[]                            // optional, fallback to Monday-auto
 }

@@ -3,7 +3,7 @@
 import { Fragment, useMemo } from 'react'
 import { useCurrency } from '@/components/currency-context'
 import { formatMoney } from '@/lib/transactions'
-import type { DailySalesData, DailySalesMachineRow, Overrides } from '@/lib/types'
+import type { DailySalesData, DailySalesMachineRow, Overrides, WeekRange } from '@/lib/types'
 import type { DatePreset } from './DateFilter'
 import { parseTransactionDate } from '@/lib/filter-utils'
 import { useEdit } from '@/components/edit-mode/EditContext'
@@ -37,7 +37,7 @@ function weekStartKey(dateStr: string): string {
   return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`
 }
 
-type WeekBucket = { key: string; label: string; dates: string[] }
+type WeekBucket = { key: string; label: string; dates: string[]; target?: number }
 
 function weekOfMonthLabel(mondayKey: string): string {
   const [y, m, d] = mondayKey.split('-').map(Number)
@@ -47,7 +47,8 @@ function weekOfMonthLabel(mondayKey: string): string {
   return `Week ${weekNum} ${monthName}`
 }
 
-function buildWeekBuckets(dates: string[]): WeekBucket[] {
+// Monday-anchored auto bucketing (fallback when no override weeks).
+function buildAutoWeekBuckets(dates: string[]): WeekBucket[] {
   const grouped: Record<string, string[]> = {}
   const order: string[] = []
   for (const d of dates) {
@@ -56,6 +57,30 @@ function buildWeekBuckets(dates: string[]): WeekBucket[] {
     grouped[key].push(d)
   }
   return order.map(key => ({ key, label: weekOfMonthLabel(key), dates: grouped[key] }))
+}
+
+// Convert "M/D/YYYY" -> "YYYY-MM-DD" for ISO comparison.
+function toIsoDate(mdY: string): string {
+  const d = parseTransactionDate(mdY)
+  if (isNaN(d.getTime())) return ''
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+// Build buckets from user-defined week ranges in overrides.
+function buildOverrideWeekBuckets(
+  dates: string[],
+  weeks: Array<{ id: string; startDate: string; endDate: string; label?: string; targetOverride?: number }>,
+): WeekBucket[] {
+  // dates are "M/D/YYYY"; convert each to ISO for range checks.
+  const isoDates = dates.map(d => ({ orig: d, iso: toIsoDate(d) }))
+  return weeks
+    .slice()
+    .sort((a, b) => a.startDate.localeCompare(b.startDate))
+    .map(w => {
+      const ds = isoDates.filter(x => x.iso >= w.startDate && x.iso <= w.endDate).map(x => x.orig)
+      const label = w.label ?? `${w.startDate.slice(5)} → ${w.endDate.slice(5)}`
+      return { key: w.id, label, dates: ds, target: w.targetOverride }
+    })
 }
 
 const LOCATION_COLORS: Record<string, string> = {
@@ -76,6 +101,7 @@ function locationBg(loc: string): string {
 type Props = {
   dailySales: DailySalesData
   preset: DatePreset
+  overrides: Overrides
 }
 
 // Apply override locationKey to a machine row (returns rebound row with
@@ -94,17 +120,22 @@ function applyDraftToRow(m: DailySalesMachineRow, draft: Overrides): DailySalesM
   }
 }
 
-export function DailySalesTable({ dailySales, preset }: Props) {
+export function DailySalesTable({ dailySales, preset, overrides }: Props) {
   const currency = useCurrency()
   const { dates, machines, locationTotals, grandTotal, kpiTarget } = dailySales
-  const weeklyTarget = kpiTarget * 7
   const { isEditMode, draft, setDraft } = useEdit()
+
+  // Per-bucket target: explicit override OR auto = kpiTarget × days_in_bucket.
+  function bucketTarget(wk: WeekBucket): number {
+    if (typeof wk.target === 'number') return wk.target
+    return kpiTarget * wk.dates.length
+  }
 
   function cellTint(qty: number): string {
     return qty > 0 && qty < kpiTarget ? 'bg-danger/15' : ''
   }
-  function weekTint(qty: number): string {
-    return qty > 0 && qty < weeklyTarget ? 'bg-danger/15' : ''
+  function weekTint(qty: number, target: number): string {
+    return qty > 0 && qty < target ? 'bg-danger/15' : ''
   }
   function cellTitle(qty: number, dateLabel: string): string {
     if (qty <= 0) return `${dateLabel} — no sale`
@@ -112,14 +143,17 @@ export function DailySalesTable({ dailySales, preset }: Props) {
       ? `${dateLabel} — Met (${qty} ≥ ${kpiTarget})`
       : `${dateLabel} — Below (${qty} < ${kpiTarget})`
   }
-  function weekTitle(qty: number, weekLabel: string): string {
+  function weekTitle(qty: number, weekLabel: string, target: number): string {
     if (qty <= 0) return `${weekLabel} — no sale`
-    return qty >= weeklyTarget
-      ? `${weekLabel} — Met (${qty} ≥ ${weeklyTarget})`
-      : `${weekLabel} — Below (${qty} < ${weeklyTarget})`
+    return qty >= target
+      ? `${weekLabel} — Met (${qty} ≥ ${target})`
+      : `${weekLabel} — Below (${qty} < ${target})`
   }
 
   const displayDates = preset === 'all' ? dates.slice(-14) : dates.slice()
+
+  // Week bucketing: use override weeks if defined, else Monday-auto.
+  const activeWeeks = isEditMode ? (draft.weeks ?? []) : (overrides.weeks ?? [])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -151,7 +185,9 @@ export function DailySalesTable({ dailySales, preset }: Props) {
 
   if (displayDates.length === 0 || machines.length === 0) return null
 
-  const weekBuckets = buildWeekBuckets(displayDates)
+  const weekBuckets: WeekBucket[] = activeWeeks.length > 0
+    ? buildOverrideWeekBuckets(displayDates, activeWeeks)
+    : buildAutoWeekBuckets(displayDates)
 
   const tdBase = 'py-1.5 px-2 text-xs whitespace-nowrap border-b border-border'
   const numCell = `${tdBase} text-right tabular-nums`
@@ -262,9 +298,10 @@ export function DailySalesTable({ dailySales, preset }: Props) {
       )}
       {weekBuckets.map(wk => {
         const wkQty = weekTotalQty(m.daily, wk.dates)
-        const wkTintCls = weekTint(wkQty)
-        const wkTip = weekTitle(wkQty, wk.label)
-        const wkDot = wkQty <= 0 ? 'bg-muted' : wkQty >= weeklyTarget ? 'bg-emerald-400' : 'bg-danger'
+        const wkTarget = bucketTarget(wk)
+        const wkTintCls = weekTint(wkQty, wkTarget)
+        const wkTip = weekTitle(wkQty, wk.label, wkTarget)
+        const wkDot = wkQty <= 0 ? 'bg-muted' : wkQty >= wkTarget ? 'bg-emerald-400' : 'bg-danger'
         return (
           <Fragment key={wk.key}>
             {wk.dates.map(d => {
@@ -394,7 +431,7 @@ export function DailySalesTable({ dailySales, preset }: Props) {
         <div className="flex items-center gap-4 flex-wrap">
           <p className="text-muted text-xs uppercase tracking-wider">Daily Sales by Machine</p>
           <span className="text-muted-strong text-xs">
-            KPI Daily: ≥ {kpiTarget} units/day · Weekly: ≥ {weeklyTarget} units/week
+            KPI Daily: ≥ {kpiTarget} units/day · Weekly: auto ≥ {kpiTarget}×days (or per-week override)
           </span>
           <span className="flex items-center gap-1.5 text-xs text-muted">
             <span className="inline-block w-3 h-3 rounded-sm bg-danger/30 border border-danger/50" />

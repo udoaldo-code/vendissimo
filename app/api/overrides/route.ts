@@ -17,6 +17,14 @@ const LocationOverrideSchema = z.object({
   order: z.number().int().min(0).max(999).optional(),
 })
 
+const WeekRangeSchema = z.object({
+  id: z.string().min(1).max(64),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  label: z.string().max(60).optional(),
+  targetOverride: z.number().int().min(0).max(99999).optional(),
+})
+
 const OverridesSchema = z.object({
   version: z.literal(1),
   updatedAt: z.string().optional(),
@@ -28,6 +36,7 @@ const OverridesSchema = z.object({
     (v) => Object.keys(v).length <= 20,
     { message: 'max 20 locations' },
   ),
+  weeks: z.array(WeekRangeSchema).max(52).optional(),
 })
 
 export async function GET() {

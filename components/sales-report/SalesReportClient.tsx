@@ -8,6 +8,7 @@ import { DailySalesTable } from '@/components/executive-summary/DailySalesTable'
 import { EditProvider } from '@/components/edit-mode/EditContext'
 import { EditModeToggle } from '@/components/edit-mode/EditModeToggle'
 import { EditBanner } from '@/components/edit-mode/EditBanner'
+import { WeeksEditor } from '@/components/edit-mode/WeeksEditor'
 
 type Props = {
   transactions: Transaction[]
@@ -48,9 +49,10 @@ export function SalesReportClient({ transactions, categoryMap, overrides }: Prop
         </div>
 
         <EditBanner />
+        <WeeksEditor />
 
         {hasData ? (
-          <DailySalesTable dailySales={dailySales} preset={preset} />
+          <DailySalesTable dailySales={dailySales} preset={preset} overrides={overrides} />
         ) : (
           <div className="bg-card border border-border rounded-lg p-5 shadow-sm">
             <p className="text-foreground text-sm font-semibold mb-2">No sales data for the selected period</p>
