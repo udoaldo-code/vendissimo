@@ -112,7 +112,7 @@ export function Sidebar() {
           <span className="block w-5 h-0.5 bg-current mb-1"></span>
           <span className="block w-5 h-0.5 bg-current"></span>
         </button>
-        <Image src="/logo.png" alt="Vendissimo" width={120} height={34} priority className="object-contain" style={{ height: 'auto' }} />
+        <Image src="/logo.png" alt="Vendissimo" width={120} height={34} priority className="object-contain" style={{ width: 'auto', height: 'auto', maxHeight: 34 }} />
       </div>
 
       {/* Mobile drawer overlay */}
