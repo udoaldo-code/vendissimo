@@ -329,7 +329,7 @@ export function DailySalesTable({ dailySales, preset, overrides }: Props) {
           <span className="text-muted text-xs">Last 14 days shown · Totals reflect full period</span>
         )}
       </div>
-      <div className="overflow-x-auto w-full">
+      <TableShell isEditMode={isEditMode} sensors={sensors} onDragEnd={handleDragEnd}>
         <table className="text-xs border-collapse" style={{ width: '100%' }}>
           <thead>
             <tr className="bg-surface-hover">
@@ -370,13 +370,7 @@ export function DailySalesTable({ dailySales, preset, overrides }: Props) {
             </tr>
           </thead>
           <tbody>
-            {isEditMode ? (
-              <DndContextWrapper sensors={sensors} onDragEnd={handleDragEnd}>
-                {locationGroups}
-              </DndContextWrapper>
-            ) : (
-              locationGroups
-            )}
+            {locationGroups}
             {/* Grand Total */}
             <tr className="bg-[#1e1b4b]">
               <td className={`sticky left-0 z-10 bg-[#1e1b4b] ${stickyTd} text-white font-bold`} style={{ boxShadow: '2px 0 4px rgba(0,0,0,0.2)' }}>
@@ -405,23 +399,30 @@ export function DailySalesTable({ dailySales, preset, overrides }: Props) {
             </tr>
           </tbody>
         </table>
-      </div>
+      </TableShell>
     </div>
   )
 }
 
 // ─── DnD helpers ──────────────────────────────────────────────────
 
-function DndContextWrapper({
-  sensors, onDragEnd, children,
+// TableShell wraps the table in a DndContext when editing. DnD must wrap
+// OUTSIDE the table because @dnd-kit injects accessibility <div> elements
+// into its tree — putting them under <tbody> is invalid HTML and triggers
+// hydration errors.
+function TableShell({
+  isEditMode, sensors, onDragEnd, children,
 }: {
+  isEditMode: boolean
   sensors: ReturnType<typeof useSensors>
   onDragEnd: (e: DragEndEvent) => void
   children: React.ReactNode
 }) {
+  const inner = <div className="overflow-x-auto w-full">{children}</div>
+  if (!isEditMode) return inner
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-      {children}
+      {inner}
     </DndContext>
   )
 }
