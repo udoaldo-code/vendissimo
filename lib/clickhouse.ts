@@ -7,7 +7,7 @@ import { getOverrides } from './overrides'
 
 const CACHE_TTL_MS = 5 * 60_000 // 5 minutes — short enough that new sales appear quickly on every page
 
-type FxInfo = { khrPerUsd: number; fetchedAt: number; source: 'api' | 'fallback' }
+type FxInfo = { khrPerUsd: number; fetchedAt: number; source: 'api' | 'fallback' | 'pinned' }
 
 let cache: { at: number; data: Transaction[]; lastSync: string | null; lastCron: string | null; fx: FxInfo | null } | null = null
 

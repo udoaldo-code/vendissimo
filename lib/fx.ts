@@ -18,9 +18,21 @@ const URLS = [
   'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/khr.json',
 ]
 
-type Cache = { khrPerUsd: number; usdPerKhr: number; fetchedAt: number; source: 'api' | 'fallback' }
+type Cache = { khrPerUsd: number; usdPerKhr: number; fetchedAt: number; source: 'api' | 'fallback' | 'pinned' }
 
 let cache: Cache | null = null
+
+/**
+ * Returns a pinned FX rate (KHR per USD) when `FX_KHR_PER_USD_PIN` env var is
+ * set to a positive number. Use this to match an upstream report (e.g. HBShengma
+ * export uses 4,018 KHR/USD). When unset, live API is used.
+ */
+function pinnedRate(): number | null {
+  const raw = process.env.FX_KHR_PER_USD_PIN
+  if (!raw) return null
+  const n = Number(raw)
+  return Number.isFinite(n) && n > 0 ? n : null
+}
 
 async function tryFetch(url: string): Promise<number | null> {
   try {
@@ -41,6 +53,17 @@ async function tryFetch(url: string): Promise<number | null> {
  */
 export async function getKhrToUsd(): Promise<Cache> {
   if (cache && Date.now() - cache.fetchedAt < CACHE_TTL_MS) {
+    return cache
+  }
+  // Pinned rate (env override) wins over live API to match upstream reports.
+  const pin = pinnedRate()
+  if (pin != null) {
+    cache = {
+      khrPerUsd: pin,
+      usdPerKhr: 1 / pin,
+      fetchedAt: Date.now(),
+      source: 'pinned',
+    }
     return cache
   }
   for (const url of URLS) {

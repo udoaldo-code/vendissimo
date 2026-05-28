@@ -98,11 +98,12 @@ export function formatLastSync(salesTime: string | null): string {
   return salesTime.slice(0, 16)
 }
 
-/** Format the KHR/USD rate for a header banner, with a tag for fallback source. */
-export function formatFxRate(rate: number | null, source: 'api' | 'fallback' | null): string {
+/** Format the KHR/USD rate for a header banner, with a tag for source. */
+export function formatFxRate(rate: number | null, source: 'api' | 'fallback' | 'pinned' | null): string {
   if (rate == null) return 'FX n/a'
   const rounded = Math.round(rate).toLocaleString('en-US')
-  return source === 'fallback' ? `FX ${rounded} KHR/USD (fallback)` : `FX ${rounded} KHR/USD`
+  const tag = source === 'fallback' ? ' (fallback)' : source === 'pinned' ? ' (pinned)' : ''
+  return `FX ${rounded} KHR/USD${tag}`
 }
 
 /** Render an amount in the active currency. */
