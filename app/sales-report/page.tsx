@@ -50,7 +50,7 @@ export default async function SalesReportPage() {
         </span>
       </div>
 
-      <SalesReportClient transactions={transactions} categoryMap={PRODUCT_CATEGORIES} overrides={overrides} />
+      <SalesReportClient transactions={transactions} categoryMap={PRODUCT_CATEGORIES} overrides={overrides} khrPerUsd={fx?.khrPerUsd ?? 4018} />
     </div>
   )
 }

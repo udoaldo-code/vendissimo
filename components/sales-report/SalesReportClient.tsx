@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import type { Currency, Overrides, Transaction } from '@/lib/types'
+import type { Overrides, Transaction } from '@/lib/types'
 import { filterByDateRange, aggregateTransactions } from '@/lib/aggregate'
 import { DateFilter, type DatePreset } from '@/components/executive-summary/DateFilter'
 import { DailySalesTable } from '@/components/executive-summary/DailySalesTable'
@@ -9,15 +9,26 @@ import { WeeklySummary } from '@/components/executive-summary/WeeklySummary'
 import { EditProvider } from '@/components/edit-mode/EditContext'
 import { EditModeToggle } from '@/components/edit-mode/EditModeToggle'
 import { EditBanner } from '@/components/edit-mode/EditBanner'
+import { CurrencyProvider, useCurrency } from '@/components/currency-context'
+import { CurrencyToggle } from '@/components/CurrencyToggle'
 
 type Props = {
   transactions: Transaction[]
   categoryMap: Record<string, string>
   overrides: Overrides
+  khrPerUsd?: number
 }
 
-export function SalesReportClient({ transactions, categoryMap, overrides }: Props) {
-  const currency: Currency = 'USD'
+export function SalesReportClient({ transactions, categoryMap, overrides, khrPerUsd }: Props) {
+  return (
+    <CurrencyProvider khrPerUsd={khrPerUsd ?? 4018}>
+      <SalesReportInner transactions={transactions} categoryMap={categoryMap} overrides={overrides} />
+    </CurrencyProvider>
+  )
+}
+
+function SalesReportInner({ transactions, categoryMap, overrides }: Props) {
+  const currency = useCurrency()
   const [preset, setPreset] = useState<DatePreset>('all')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
@@ -45,7 +56,10 @@ export function SalesReportClient({ transactions, categoryMap, overrides }: Prop
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <DateFilter preset={preset} dateFrom={dateFrom} dateTo={dateTo} onChange={handleChange} />
-          <EditModeToggle initialOverrides={overrides} />
+          <div className="flex items-center gap-2">
+            <CurrencyToggle />
+            <EditModeToggle initialOverrides={overrides} />
+          </div>
         </div>
 
         <EditBanner />

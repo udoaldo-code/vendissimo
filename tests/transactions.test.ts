@@ -29,6 +29,8 @@ describe('rowToTransaction', () => {
       location: 'KHMER House',
       product: 'BACCHUS',
       unitPrice: 1.5,
+      amountKhrRaw: null,
+      originalCurrency: 'USD',
       qty: 1,
       time: '23:05:48',
       date: '1/31/2026',
@@ -97,8 +99,10 @@ describe('formatMoney', () => {
     expect(formatMoney(0, 'USD')).toBe('$0.00')
   })
 
-  it('formats KHR with the riel sign and no decimals', () => {
-    expect(formatMoney(2500, 'KHR')).toBe('៛2,500')
+  it('back-converts USD → KHR for display using supplied fx (default 4018)', () => {
+    // amount is USD; KHR display multiplies by khrPerUsd
+    expect(formatMoney(1, 'KHR')).toBe('៛4,018')              // default fx
+    expect(formatMoney(2.5, 'KHR', 4000)).toBe('៛10,000')     // explicit fx
     expect(formatMoney(0, 'KHR')).toBe('៛0')
   })
 })

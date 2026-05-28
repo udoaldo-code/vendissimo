@@ -87,11 +87,13 @@ export type Transaction = {
   machine: string
   location: string
   product: string
-  unitPrice: number
+  unitPrice: number              // USD (per-row converted from KHR if applicable)
+  amountKhrRaw: number | null    // original KHR amount if originalCurrency='KHR', else null
+  originalCurrency: Currency     // 'USD' (pre-cutoff) or 'KHR' (post-cutoff)
   qty: number
   time: string
   date: string
-  currency: Currency
+  currency: Currency             // display currency tag — always 'USD' for now
 }
 
 export type FilterState = {

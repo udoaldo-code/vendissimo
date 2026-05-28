@@ -64,6 +64,8 @@ export function rowToTransaction(
     location: locationLabel,
     product: row.product_name ?? '',
     unitPrice: usdPrice,
+    amountKhrRaw: originalCurrency === 'KHR' ? safePrice : null,
+    originalCurrency,
     qty: 1,
     time: salesTime.slice(11, 19),
     date: reformatDate(salesTime),
@@ -106,10 +108,17 @@ export function formatFxRate(rate: number | null, source: 'api' | 'fallback' | '
   return `FX ${rounded} KHR/USD${tag}`
 }
 
-/** Render an amount in the active currency. */
-export function formatMoney(amount: number, currency: Currency): string {
+/**
+ * Render an amount in the active currency.
+ *
+ * `amount` is ALWAYS a USD value (aggregator state is USD-normalized).
+ * When `currency === 'KHR'`, the supplied `khrPerUsd` is used to back-convert
+ * USD → KHR for display only. If `khrPerUsd` is omitted in KHR mode, falls
+ * back to 4018 (matches HBShengma reconciliation rate).
+ */
+export function formatMoney(amount: number, currency: Currency, khrPerUsd: number = 4018): string {
   if (currency === 'USD') {
     return '$' + amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   }
-  return '៛' + Math.round(amount).toLocaleString('en-US')
+  return '៛' + Math.round(amount * khrPerUsd).toLocaleString('en-US')
 }
